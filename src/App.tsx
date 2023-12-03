@@ -1,13 +1,22 @@
-import Scene from './scene/scene'
-import Page from './page'
+import  { useEffect } from 'react'
 import SynthwaveBackground from './synthwaveBg/synthwaveBackground'
+import Game from './core/game'
 
 function App() {
+
+useEffect(() => {
+    const game = Game()
+
+    return () => {
+      game.destroy(true)
+    }
+  }, [])
+
 
   return (
     <>
     <SynthwaveBackground>
-      <Scene/>
+      <div id="phaser-container" className="App"></div>
     </SynthwaveBackground>
     </>
   )
