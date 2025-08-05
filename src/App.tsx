@@ -1,17 +1,15 @@
-import Menu from './menu'
-import NameBanner from './Name'
-import ProjectsCard from './ProjectsCard'
-import Scene from './scene/scene'
-import SynthwaveBackground from './synthwaveBg/synthwaveBackground'
+
+import Scene from './components/scene'
+import { Cursor } from './cursor';
+
 
 function App() {
 
+
   return(
-    <div id='background' className="animated-background flex flex-col h-full w-full overflow-x-hidden">
+    <div id='background' className="flex flex-col h-full w-full overflow-x-hidden">
+      <Cursor/>
       <Scene/>
-      <NameBanner/>
-      <Menu/>
-      <ProjectsCard/>
     </div>
   )
 }

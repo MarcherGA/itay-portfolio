@@ -1,0 +1,1 @@
+type RuneType = 'algiz' | 'fehu' | 'inguz' | 'jera' | 'mannaz' | 'raido' | 'sowelu' | 'uruz' | 'othila' | 'berkana';

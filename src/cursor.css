@@ -1,0 +1,39 @@
+body {
+    cursor: url('/cursors/crystal-styled-cursor.png') 24 24, auto;
+  }
+  
+  body.hovering-interactive {
+    cursor: url('/cursors/crystal-styled-cursor-hover.png') 24 24, auto;
+  }
+  
+  
+  #cursor-pulse {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: radial-gradient(rgba(0, 255, 255, 0.6), transparent 60%);
+    animation: pulse 3s ease-out infinite;
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+  }
+  
+  @keyframes pulse {
+    0% {
+      transform: translate(-50%, -50%) scale(1);
+      opacity: 0.3;
+    }
+    100% {
+      transform: translate(-50%, -50%) scale(2.5);
+      opacity: 0;
+    }
+  }
+  
+
+  body.hovering-interactive #cursor-pulse {
+    background: radial-gradient(rgba(0, 255, 255, 0.8), transparent 80%);
+    animation-duration: 1s;
+  }
