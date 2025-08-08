@@ -1,7 +1,6 @@
 import { useEffect, useRef, useMemo } from "react";
-import { useLoader } from "@react-three/fiber";
+import { useFrame, useLoader } from "@react-three/fiber";
 import * as THREE from "three";
-import { TextureLoader } from "three";
 
 // Split shader parts
 import vertexMain from "@/shaders/cloud.vert?raw";
@@ -9,14 +8,16 @@ import fragmentMain from "@/shaders/cloud.frag?raw";
 import snoise from "@/shaders/glsl-noise.glsl?raw";
 import fbm3d from "@/shaders/glsl-fractal-brown-noise.glsl?raw";
 import levels from "@/shaders/levels.glsl?raw";
+import { useTexture } from "@react-three/drei";
+import { sharedCloudPlane } from "../../three/shared";
 
-const COUNT = 40;
+const COUNT = 20;
 
 export function Clouds() {
   const meshRef = useRef<THREE.InstancedMesh>(null);
   const timeUniform = useRef({ value: 0 });
 
-  const [shapeTexture, noiseTexture] = useLoader(TextureLoader, [
+  const [shapeTexture, noiseTexture] = useTexture([
     "/textures/cloud/1.jpg",
     "/textures/cloud/2.jpg",
   ]);
@@ -42,30 +43,30 @@ export function Clouds() {
     return data;
   }, []);
 
-  const geometry = useMemo(() => new THREE.PlaneGeometry(1, 1), []);
-
-  useEffect(() => {
-    geometry.setAttribute(
+  const geometry = useMemo(() => {
+    const geo = sharedCloudPlane;
+    geo.setAttribute(
       "instanceSeed",
       new THREE.InstancedBufferAttribute(seedArray, 4)
     );
-  }, [geometry, seedArray]);
+    return geo;
+  }, [seedArray]);
 
   const matrices = useMemo(() => {
     const dummy = new THREE.Object3D();
     const transforms = [];
-    const minPhi = 0.5;    
+    const minPhi = 0.9;    
     const maxPhi = Math.PI - minPhi;
   
     for (let i = 0; i < COUNT; i++) {
       const theta = Math.random() * Math.PI * 2;
       const phi = minPhi + Math.random() * (maxPhi - minPhi);
-      const r = 70 + Math.random() * 25;
+      const r = 70 //+ Math.random() * 25;
   
       const x = r * Math.sin(phi) * Math.cos(theta);
       const y = r * Math.cos(phi) * 0.5; 
       const z = r * Math.sin(phi) * Math.sin(theta);
-      const scale = 30 + Math.random() * 40;
+      const scale = 50 + Math.random() * 40;
   
       dummy.position.set(x, y, z);
       dummy.scale.set(scale, scale, 1);
@@ -83,12 +84,17 @@ export function Clouds() {
     meshRef.current.instanceMatrix.needsUpdate = true;
   }, [matrices]);
 
+  useFrame((state) => {
+    timeUniform.current.value = state.clock.elapsedTime;
+  });
+
 
   return (
     <instancedMesh
       ref={meshRef}
       geometry={geometry}
       args={[undefined, undefined, COUNT]}
+      matrixAutoUpdate={false}
       frustumCulled
       renderOrder={-1}
       raycast={() => null}

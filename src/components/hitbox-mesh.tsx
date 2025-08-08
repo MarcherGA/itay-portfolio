@@ -2,6 +2,7 @@ import { JSX, useEffect, useRef } from "react";
 import { Mesh, Raycaster, Intersection, Object3D } from "three";
 import { ThreeEvent } from "@react-three/fiber";
 import { useHoverPointer } from "../hooks/useHoverPointer";
+import { debugHitMaterial, sharedBoxGeometry } from "../three/shared";
 
 type HitboxMeshProps = {
   debug?: boolean;
@@ -10,6 +11,8 @@ type HitboxMeshProps = {
   onPointerEnter?: (e: ThreeEvent<PointerEvent>) => void;
   onPointerLeave?: (e: ThreeEvent<PointerEvent>) => void;
 } & JSX.IntrinsicElements["mesh"];
+
+
 
 export function HitboxMesh({
   debug = false,
@@ -70,12 +73,10 @@ export function HitboxMesh({
       onClick={enabled ? handleClick : undefined}
       onPointerEnter={enabled ? handlePointerEnter : undefined}
       onPointerLeave={enabled ? handlePointerLeave : undefined}
+      material={debug ? debugHitMaterial : undefined}
+      geometry={sharedBoxGeometry}
       {...props}
     >
-      <boxGeometry />
-      {debug && (
-        <meshBasicMaterial transparent opacity={0.6} depthWrite={false} />
-      )}
     </mesh>
   );
 }

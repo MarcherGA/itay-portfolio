@@ -29,19 +29,21 @@ type Props = {
   typingAnimation?: TypingAnimation
   typingSpeed?: number
   hoverScaleSpeed?: number
-  expandScaleSpeed?: number 
+  expandScaleSpeed?: number
+  onExpandComplete?: () => void
 }
 
-export default function SpeechBubble({ 
-  hoverText = 'Hi', 
+export default function SpeechBubble({
+  hoverText = 'Hi',
   expandedText = "...",
-  showOnHover = true, 
+  showOnHover = true,
   expanded = false,
   expandDelay = 1500,
   typingAnimation = 'blinking-cursor',
   typingSpeed = 55,
   hoverScaleSpeed = 6,
-  expandScaleSpeed = 8
+  expandScaleSpeed = 8,
+  onExpandComplete,
 }: Props) {
   const groupRef = useRef<THREE.Group>(null)
   const textRef = useRef<THREE.Group>(null)
@@ -52,9 +54,9 @@ export default function SpeechBubble({
   const expandScale = useRef(0)
   const lastMaterialScale = useRef(new THREE.Vector2())
   const lastTextScale = useRef(new THREE.Vector2())
-
   const [shouldExpand, setShouldExpand] = useState(false)
   const [cursorVisible, setCursorVisible] = useState(false)
+  const [expandCompleteFired, setExpandCompleteFired] = useState(false)
 
   const {
     displayedText,
@@ -106,14 +108,32 @@ export default function SpeechBubble({
       hideHoverPointer()
       setCursorVisible(false)
     }
-  }, [typingDone, cursorVisible, hideHoverPointer])
+    if (typingDone && !expandCompleteFired) {
+      onExpandComplete?.()
+      setExpandCompleteFired(true)
+    }
+    if (!expanded) {
+      setExpandCompleteFired(false)
+    }
+  }, [typingDone, cursorVisible, hideHoverPointer, onExpandComplete, expandCompleteFired, expanded])
 
   useFrame((_, delta) => {
-    const hoverTarget = expanded ? 1 : (showOnHover ? 1 : 0)
-    const expandTarget = (hoverScale.current > 0.99 && shouldExpand) ? 1 : 0
+    const hoverTarget = showOnHover ? 1 : 0
+    const expandTarget = shouldExpand ? 1 : 0
 
-    hoverScale.current = THREE.MathUtils.damp(hoverScale.current, hoverTarget, hoverScaleSpeed, delta)
-    expandScale.current = THREE.MathUtils.damp(expandScale.current, expandTarget, expandScaleSpeed, delta)
+    const prevH = hoverScale.current
+    const prevE = expandScale.current
+
+    hoverScale.current = THREE.MathUtils.damp(prevH, hoverTarget, hoverScaleSpeed, delta)
+    expandScale.current = THREE.MathUtils.damp(prevE, expandTarget, expandScaleSpeed, delta)
+
+    // 🧠 Bail early if no changes
+    if (
+      Math.abs(prevH - hoverScale.current) < 0.0001 &&
+      Math.abs(prevE - expandScale.current) < 0.0001
+    ) {
+      return
+    }
 
     updateGroupTransform()
     updateTextScale()
@@ -186,23 +206,23 @@ export default function SpeechBubble({
         position={[0, 2.15, 0]}
         visible={expanded || showOnHover || hoverScale.current > 0.01}
       >
-      <mesh
-        onPointerDown={() => {
-          if (shouldExpand && isTyping) {
-            handlePointerDown()
-          }
-        }}
-        onPointerEnter={() => {
-          if (shouldExpand && isTyping) {
-            showHoverPointer()
-            setCursorVisible(true)
-          }
-        }}
-        onPointerLeave={() => {
-          hideHoverPointer()
-          setCursorVisible(false)
-        }}
-      >
+        <mesh
+          onPointerDown={() => {
+            if (shouldExpand && isTyping) {
+              handlePointerDown()
+            }
+          }}
+          onPointerEnter={() => {
+            if (shouldExpand && isTyping) {
+              showHoverPointer()
+              setCursorVisible(true)
+            }
+          }}
+          onPointerLeave={() => {
+            hideHoverPointer()
+            setCursorVisible(false)
+          }}
+        >
           <planeGeometry args={[1, 1]} />
           <nineSliceMaterial
             ref={materialRef}

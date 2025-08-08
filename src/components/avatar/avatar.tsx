@@ -1,4 +1,4 @@
-import { useRef, useEffect, useMemo, useCallback, JSX, useState } from 'react'
+import { useRef, useEffect, useMemo, useCallback, JSX, useState, memo } from 'react'
 import { useGLTF, useAnimations } from '@react-three/drei'
 import * as THREE from 'three'
 import { SkeletonUtils } from 'three-stdlib'
@@ -7,6 +7,7 @@ import { useCameraTransition } from '../../hooks/useCameraTransition'
 import { Vector3 } from 'three'
 import content from "../../data/content.json"
 import { HitboxMesh } from '../hitbox-mesh'
+import { TypingAnimation } from '../../hooks/useTypingAnimation'
 
 const skeletonClone = SkeletonUtils.clone
 type AvatarProps = {
@@ -15,14 +16,15 @@ type AvatarProps = {
   position?: Vector3
 } & JSX.IntrinsicElements['group']
 
-const camPos = new Vector3(-5, 1.82, -0.54);
-const lookAt = new Vector3(-5.836, 1.67, -1.075);
+const AVATAR_CAMERA_POSITION_OFFSET = new Vector3(1.844, 2.32, 2.14);
+const AVATAR_LOOK_AT_OFFSET = new Vector3(1.008, 2.17, 1.6);
 
-export default function Avatar({ isFocused, setIsFocused, position, ...props }: AvatarProps) {
+
+function Avatar({ isFocused, setIsFocused, position, ...props }: AvatarProps) {
   const { scene: glbScene, animations } = useGLTF('/models/avatar.glb')
   const avatar = useMemo(() => {
     const cloned = skeletonClone(glbScene)
-    cloned.traverse((c) => {
+    glbScene.traverse((c) => {
       if ((c as THREE.Mesh).isMesh) {
         const mesh = c as THREE.Mesh
         mesh.raycast = () => null as any
@@ -36,14 +38,20 @@ export default function Avatar({ isFocused, setIsFocused, position, ...props }: 
     return cloned
   }, [glbScene])
   const [hovered, setHovered] = useState(false);
+  const [isTransitioning, setIsTransitioning] = useState(false)
 
 
   const cameraTransition = useCameraTransition()
   const handleClick = () => {
-    const finalCamPos = position ? camPos.clone().add(position) : camPos
-    const finalLookAt = position ? lookAt.clone().add(position) : lookAt
-    cameraTransition(finalCamPos, finalLookAt)
-    setIsFocused(true)
+    const finalCamPos = avatar.getWorldPosition(new Vector3()).add(AVATAR_CAMERA_POSITION_OFFSET)
+    const finalLookAt = avatar.getWorldPosition(new Vector3()).add(AVATAR_LOOK_AT_OFFSET)
+  
+    setIsTransitioning(true) // 💡 start transition
+  
+    cameraTransition(finalCamPos, finalLookAt, undefined, undefined, () => {
+      setIsFocused(true) // ✅ set focus AFTER transition
+      setIsTransitioning(false) // ✅ done transitioning
+    })
   }
 
   const group = useRef<THREE.Group>(null)
@@ -88,10 +96,21 @@ export default function Avatar({ isFocused, setIsFocused, position, ...props }: 
     setHovered(false);
   }, [])
 
+  const speechProps = useMemo(() => ({
+    hoverText: "Hi!",
+    expandedText: content.About,
+    showOnHover: hovered || isTransitioning || isFocused,
+    expanded: isFocused,
+    expandDelay: 0,
+    typingAnimation: 'blinking-line' as TypingAnimation,
+    expandScaleSpeed: 6,
+  }), [hovered, isFocused, isTransitioning]);
+  
+
   return (
     <group ref={group} position={position} {...props} dispose={null}>
       {/* Avatar mesh */}
-      <primitive object={avatar} />
+      <primitive object={avatar} dispose={null}/>
 
       {/* Hitbox */}
       <HitboxMesh
@@ -104,16 +123,21 @@ export default function Avatar({ isFocused, setIsFocused, position, ...props }: 
       />
 
       <SpeechBubble 
-        hoverText="Hi!" 
-        expandedText={content.About}
-        showOnHover={hovered} // OR set this to true always if you want it to fade in manually
-        expanded={isFocused}
-        expandDelay={1500}
-        typingAnimation='blinking-line'
-        expandScaleSpeed={6}
+        {...speechProps}
       />
     </group>
   )
 }
 
 useGLTF.preload('/models/avatar.glb')
+
+export default memo(Avatar, (prev, next) => {
+  const sameFocus = prev.isFocused === next.isFocused;
+  const sameSetter = prev.setIsFocused === next.setIsFocused;
+  const samePosition =
+    prev.position && next.position
+      ? prev.position.equals(next.position)
+      : prev.position === next.position;
+
+  return sameFocus && sameSetter && samePosition;
+});

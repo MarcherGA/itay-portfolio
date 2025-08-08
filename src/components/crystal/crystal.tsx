@@ -1,8 +1,8 @@
 import { Mesh, MeshStandardMaterial, MeshToonMaterial, Vector3 } from "three";
 import { useCameraTransition } from "../../hooks/useCameraTransition";
 import { JSX, useEffect, useRef } from "react";
-import { useSpring, useSpringValue } from "@react-spring/three";
 import { HitboxMesh } from "../hitbox-mesh";
+import { useEmissiveSpring } from "../../hooks/useEmmisiveSpring";
 
 type InteractableCrystalProps = {
   mesh: Mesh | null;
@@ -10,32 +10,38 @@ type InteractableCrystalProps = {
   setIsFocused: (v: boolean) => void;
 } & JSX.IntrinsicElements["group"];
 
-const position = new Vector3(-5.1, 0.83, 0.53);
-const lookAt = new Vector3(-5.3, 0.87, -0.45);
+const CRYSTAL_CAMERA_POSITION_OFFSET = new Vector3(0.9, 1.33, 2.53);
+const CRYSTAL_LOOK_AT_OFFSET = new Vector3(0.7, 1.37, 1.55);
 
 export function InteractableCrystal({ mesh, isFocused, setIsFocused, ...props }: InteractableCrystalProps) {
   const cameraTransition = useCameraTransition();
   const clonedMaterialRef = useRef<MeshToonMaterial | null>(null);
+  
 
   // Spring values
-  const { emissiveIntensity } = useSpring({ emissiveIntensity: 1, onChange: () => { if (clonedMaterialRef.current) clonedMaterialRef.current.emissiveIntensity = emissiveIntensity.get()} , config: { mass: 1, tension: 120, friction: 20 } });
-  const { color } = useSpring({ color: "#00aaff", onChange: () => clonedMaterialRef.current?.emissive.set(color.get()) , config: { mass: 1, tension: 120, friction: 20 } });
+  const { emissiveIntensity, color } = useEmissiveSpring(clonedMaterialRef, "#00aaff");
 
   useEffect(() => {
-    if (!clonedMaterialRef.current && mesh?.material) {
+    if (!mesh?.material) return;
+  
+    const isToon = mesh.material instanceof MeshToonMaterial;
+    if (!isToon) {
       const mat = new MeshToonMaterial().copy(mesh.material as MeshStandardMaterial);
       mat.emissiveIntensity = 1.2;
       mat.emissive.set("#00aaff");
       mesh.material = mat;
       clonedMaterialRef.current = mat;
+    } else {
+      clonedMaterialRef.current = mesh.material as MeshToonMaterial;
     }
   }, [mesh]);
 
 
   const handleClick = () => {
-    cameraTransition(position, lookAt);
+    const finalCamPos = mesh!.getWorldPosition(new Vector3()).add(CRYSTAL_CAMERA_POSITION_OFFSET)
+    const finalLookAt = mesh!.getWorldPosition(new Vector3()).add(CRYSTAL_LOOK_AT_OFFSET)
+    cameraTransition(finalCamPos, finalLookAt, undefined, undefined, ()=> setIsFocused(true));
     handlePointerLeave();
-    setIsFocused(true);
   };
 
   const handlePointerEnter = () => {
@@ -56,7 +62,7 @@ export function InteractableCrystal({ mesh, isFocused, setIsFocused, ...props }:
 
   return (
     <group {...props} dispose={null}>
-      <primitive object={mesh} {...props} />
+      <primitive object={mesh} />
       <HitboxMesh
         enabled={!isFocused}
         position={[0.35,1.35, -0.07]}

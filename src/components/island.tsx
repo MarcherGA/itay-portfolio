@@ -1,11 +1,13 @@
 import { useGLTF } from "@react-three/drei";
-import { JSX, useEffect, useState } from "react";
+import { JSX, useEffect, useMemo, useState } from "react";
 import * as THREE from "three";
 import { MeshStandardMaterial, MeshToonMaterial } from "three";
 import { InteractableCrystal } from "./crystal/crystal";
 import { Sign } from "./sign/sign";
 import Avatar from "./avatar/avatar";
 import { FloatingCrystals } from "./crystal/floating-crystals";
+
+type FocusTarget = "crystal" | "sign" | "avatar" | null;
 
 type FloatingIslandProps = {
   onLoad?: (nodes: Record<string, THREE.Object3D>) => void;
@@ -16,53 +18,37 @@ export function FloatingIsland({ onLoad, ...groupProps }: FloatingIslandProps) {
     scene: THREE.Group;
     nodes: Record<string, THREE.Mesh>;
   };
-  const [isSignFocused, setIsSignFocused] = useState(false);
-  const [isCrystalFocused, setIsCrystalFocused] = useState(false);
-  const [isAvatarFocused, setIsAvatarFocused] = useState(false);
+  const [focus, setFocus] = useState<FocusTarget>(null);
 
-  const island = nodes["island"];
-  const crystal = nodes["crystal"];
-  const sign = nodes["sign"] || nodes["Sign"];
-
-  useEffect(() => {
-    if (isAvatarFocused) {
-      if (isSignFocused) setIsSignFocused(false);
-      if (isCrystalFocused) setIsCrystalFocused(false);
-    }
-  }, [isAvatarFocused]);
-  
-  useEffect(() => {
-    if (isCrystalFocused) {
-      if (isAvatarFocused) setIsAvatarFocused(false);
-      if (isSignFocused) setIsSignFocused(false);
-    }
-  }, [isCrystalFocused]);
-  
-  useEffect(() => {
-    if (isSignFocused) {
-      if (isCrystalFocused) setIsCrystalFocused(false);
-      if (isAvatarFocused) setIsAvatarFocused(false);
-    }
-  }, [isSignFocused]);
+  const { island, crystal, sign } = useMemo(() => {
+    return {
+      island: nodes["island"],
+      crystal: nodes["crystal"],
+      sign: nodes["sign"] || nodes["Sign"],
+    };
+  }, [nodes]);
 
   // Replace island material with toon
   useEffect(() => {
-    if (island?.material) {
-      const mat = island.material as MeshStandardMaterial;
-      const toonMat = new MeshToonMaterial().copy(mat);
+    if (island?.material && !(island.material instanceof MeshToonMaterial)) {
+      const toonMat = new MeshToonMaterial().copy(island.material as MeshStandardMaterial);
       island.material = toonMat;
     }
+    scene.traverse(obj => {
+      obj.frustumCulled = true;
+      obj.matrixAutoUpdate = false;
+    });
     onLoad?.(nodes);
-  }, [island, onLoad]);
+  }, []);
 
   return (
     <group raycast={()=>null} {...groupProps}>
-      <primitive object={scene} />
-      {crystal &&<><InteractableCrystal mesh={crystal} isFocused={isCrystalFocused} setIsFocused={setIsCrystalFocused}    />
-        <FloatingCrystals rotation={[0, 0.5, 0]} parent={island} visible={isCrystalFocused} /> </> 
+      <primitive object={scene} dispose={null} />
+      {crystal &&<><InteractableCrystal mesh={crystal} isFocused={focus === "crystal"} setIsFocused={()=> setFocus("crystal")}    />
+        <FloatingCrystals rotation={[0, 0.5, 0]} parent={island} visible={focus === "crystal"} /> </> 
       }
-      {sign && <Sign setIsFocused={setIsSignFocused} isFocused={isSignFocused}  mesh={sign} />}
-      <Avatar isFocused={isAvatarFocused} setIsFocused={setIsAvatarFocused} parent={island} scale={1.3} rotation={[0, Math.PI * 0.36, 0]} position={new THREE.Vector3(-1, -0.12, 2.1)}/>
+      {sign && <Sign setIsFocused={()=> setFocus("sign")} isFocused={focus === "sign"}  mesh={sign} />}
+      <Avatar isFocused={focus === "avatar"} setIsFocused={()=>setFocus("avatar")} parent={island} scale={1.3} rotation={[0, Math.PI * 0.36, 0]} position={new THREE.Vector3(-1, -0.12, 2.1)}/>
     </group>
   );
 }

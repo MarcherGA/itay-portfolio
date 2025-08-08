@@ -4,6 +4,7 @@ import { useCameraTransition } from '../../hooks/useCameraTransition';
 import ProjectsCarousel from '../projects-carousel/projetcs-carousel';
 import { SignRunesOverlay } from './sign-runes-overlay';
 import { HitboxMesh } from '../hitbox-mesh';
+import React from 'react';
 
 type SignProps = {
   mesh: Mesh | null;
@@ -11,9 +12,11 @@ type SignProps = {
   setIsFocused: (v: boolean) => void;
 } & JSX.IntrinsicElements['group'];
 
-export function Sign({ mesh, isFocused, setIsFocused, ...props }: SignProps) {
-  const targetPosition = useMemo(() => new Vector3(-4.35, 1, -1.17), []);
-  const lookAtTarget = useMemo(() => new Vector3(-3.65, 0.72, -1.81), []);
+// These are relative to the mesh position
+const SIGN_CAMERA_POSITION_OFFSET = new Vector3(-1.29, 0.66, 1.13);
+const SIGN_LOOK_AT_OFFSET = new Vector3(-0.59, 0.38, 0.49);
+
+function SignComponent({ mesh, isFocused, setIsFocused, ...props }: SignProps) {
   const transitionToSign = useCameraTransition();
 
   const [hovered, setHovered] = useState(false);
@@ -25,8 +28,15 @@ export function Sign({ mesh, isFocused, setIsFocused, ...props }: SignProps) {
   }, [mesh]);
 
   const handleClick = () => {
-    if (isFocused) return;
-    transitionToSign(targetPosition, lookAtTarget, 1.5);
+    if (isFocused || !mesh) return;
+
+    const worldPosition = new Vector3();
+    mesh.getWorldPosition(worldPosition);
+
+    const cameraPosition = worldPosition.clone().add(SIGN_CAMERA_POSITION_OFFSET);
+    const lookAtTarget = worldPosition.clone().add(SIGN_LOOK_AT_OFFSET);
+
+    transitionToSign(cameraPosition, lookAtTarget, 1.5);
     setIsFocused(true);
   };
 
@@ -34,16 +44,14 @@ export function Sign({ mesh, isFocused, setIsFocused, ...props }: SignProps) {
   const handlePointerLeave = useCallback(() => setHovered(false), []);
 
   useEffect(() => {
-    if (!isFocused) {
-      setHovered(false);
-    }
+    if (!isFocused) setHovered(false);
   }, [isFocused]);
 
   if (!mesh) return null;
 
   return (
     <group {...props} dispose={null}>
-      <primitive object={mesh}>
+      <primitive object={mesh} dispose={null}>
         <SignRunesOverlay
           hovered={hovered}
           isFocused={isFocused}
@@ -72,3 +80,5 @@ export function Sign({ mesh, isFocused, setIsFocused, ...props }: SignProps) {
     </group>
   );
 }
+
+export const Sign = React.memo(SignComponent);

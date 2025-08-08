@@ -10,6 +10,7 @@ export function useCameraTransition() {
     lookAtTarget: THREE.Vector3,
     duration = 1.5,
     ease = 'power2.inOut',
+    onComplete?: () => void
   ) => {
     const fromPos = camera.position.clone();
     const fromLook = new THREE.Vector3();
@@ -22,8 +23,10 @@ export function useCameraTransition() {
       z: fromPos.z,
       lx: fromLook.x,
       ly: fromLook.y,
-      lz: fromLook.z
+      lz: fromLook.z,
     };
+
+    gsap.killTweensOf(tweenState);
 
     gsap.to(tweenState, {
       x: toPosition.x,
@@ -37,7 +40,8 @@ export function useCameraTransition() {
       onUpdate: () => {
         camera.position.set(tweenState.x, tweenState.y, tweenState.z);
         camera.lookAt(tweenState.lx, tweenState.ly, tweenState.lz);
-      }
+      },
+      onComplete: onComplete,
     });
   };
 }
