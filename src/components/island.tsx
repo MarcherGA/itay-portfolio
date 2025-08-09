@@ -5,7 +5,6 @@ import { MeshStandardMaterial, MeshToonMaterial } from "three";
 import { InteractableCrystal } from "./crystal/crystal";
 import { Sign } from "./sign/sign";
 import Avatar from "./avatar/avatar";
-import { FloatingCrystals } from "./crystal/floating-crystals";
 
 type FocusTarget = "crystal" | "sign" | "avatar" | null;
 
@@ -44,8 +43,7 @@ export function FloatingIsland({ onLoad, ...groupProps }: FloatingIslandProps) {
   return (
     <group raycast={()=>null} {...groupProps}>
       <primitive object={scene} dispose={null} />
-      {crystal &&<><InteractableCrystal mesh={crystal} isFocused={focus === "crystal"} setIsFocused={()=> setFocus("crystal")}    />
-        <FloatingCrystals rotation={[0, 0.5, 0]} parent={island} visible={focus === "crystal"} /> </> 
+      {crystal &&<InteractableCrystal mesh={crystal} isFocused={focus === "crystal"} setIsFocused={()=> setFocus("crystal")}    />
       }
       {sign && <Sign setIsFocused={()=> setFocus("sign")} isFocused={focus === "sign"}  mesh={sign} />}
       <Avatar isFocused={focus === "avatar"} setIsFocused={()=>setFocus("avatar")} parent={island} scale={1.3} rotation={[0, Math.PI * 0.36, 0]} position={new THREE.Vector3(-1, -0.12, 2.1)}/>

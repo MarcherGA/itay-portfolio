@@ -6,6 +6,7 @@ import { useRef } from 'react';
 import { a, animated, SpringValue } from '@react-spring/three';
 
 const AnimatedText = animated(Text);
+const AnimatedMeshBasicMaterial = a.meshBasicMaterial as unknown as React.FC<any>;
 
 type Props = {
   project: Project;
@@ -46,7 +47,7 @@ export default function ProjectDisplay({ focused = false, project, texture, visi
             ) || isImage && texture && (
               <mesh ref={imageMeshRef} scale={0.4} position={[0, 0.07, 0.01]}>
                 <planeGeometry args={[1.5, 0.9]} />
-                <a.meshBasicMaterial map={texture} transparent opacity={typeof opacity === 'number' ? opacity : opacity?.to(o => o)} />
+                <AnimatedMeshBasicMaterial map={texture} transparent opacity={typeof opacity === 'number' ? opacity : opacity?.to(o => o)} />
               </mesh>
             )}
           </>

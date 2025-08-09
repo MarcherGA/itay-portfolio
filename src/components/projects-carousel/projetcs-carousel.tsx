@@ -1,7 +1,7 @@
 import { useLoader } from '@react-three/fiber';
 import { JSX, useEffect, useRef, useState } from 'react';
 import { Group, TextureLoader, Euler } from 'three';
-import { a, useSpring } from '@react-spring/three';
+import { useSpring } from '@react-spring/three';
 import content from '../../data/content.json';
 import * as THREE from 'three';
 import ProjectDisplay from './project-display';

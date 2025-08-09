@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import './cursor.css';
 
-const INTERACTIVE_TAGS = ['A', 'BUTTON', 'LABEL', 'INPUT', 'TEXTAREA'];
+//const INTERACTIVE_TAGS = ['A', 'BUTTON', 'LABEL', 'INPUT', 'TEXTAREA'];
 
 export function Cursor() {
   useEffect(() => {

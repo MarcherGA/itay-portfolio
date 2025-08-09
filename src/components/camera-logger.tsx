@@ -6,7 +6,7 @@ export function CameraLogger() {
   const { camera } = useThree()
 
   useEffect(() => {
-    const handleKey = (e: any) => {
+    const handleKey = () => {
       const camPos = camera.position.clone()
         const dir = new THREE.Vector3()
         camera.getWorldDirection(dir)

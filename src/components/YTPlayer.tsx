@@ -7,6 +7,8 @@ import { useLoader } from '@react-three/fiber';
 import { a, SpringValue } from '@react-spring/three';
 import { useHoverPointer } from '../hooks/useHoverPointer';
 
+const AnimatedMeshBasicMaterial = a.meshBasicMaterial as unknown as React.FC<any>;
+
 type Props = {
   videoId: string;
   visible: boolean;
@@ -54,7 +56,7 @@ export default function YTPlayer3D({ videoId, visible, opacity }: Props) {
       
     >
       <planeGeometry args={[1.5, 0.9]} />
-      <a.meshBasicMaterial map={thumbnail} transparent opacity={typeof opacity === 'number' ? opacity : opacity?.to(o => o)}/>
+      <AnimatedMeshBasicMaterial map={thumbnail} transparent opacity={typeof opacity === 'number' ? opacity : opacity?.to(o => o)}/>
     </mesh>
   );
 }

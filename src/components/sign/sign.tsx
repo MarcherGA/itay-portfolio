@@ -1,4 +1,4 @@
-import { JSX, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { JSX, useCallback, useEffect, useRef, useState } from 'react';
 import { Mesh, Vector3 } from 'three';
 import { useCameraTransition } from '../../hooks/useCameraTransition';
 import ProjectsCarousel from '../projects-carousel/projetcs-carousel';
@@ -36,8 +36,10 @@ function SignComponent({ mesh, isFocused, setIsFocused, ...props }: SignProps) {
     const cameraPosition = worldPosition.clone().add(SIGN_CAMERA_POSITION_OFFSET);
     const lookAtTarget = worldPosition.clone().add(SIGN_LOOK_AT_OFFSET);
 
-    transitionToSign(cameraPosition, lookAtTarget, 1.5);
-    setIsFocused(true);
+    transitionToSign(cameraPosition, lookAtTarget, 1.5, undefined, () => {
+      setIsFocused(true);
+    });
+
   };
 
   const handlePointerEnter = useCallback(() => setHovered(true), []);

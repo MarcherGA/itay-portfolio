@@ -3,6 +3,7 @@ import { useCameraTransition } from "../../hooks/useCameraTransition";
 import { JSX, useEffect, useRef } from "react";
 import { HitboxMesh } from "../hitbox-mesh";
 import { useEmissiveSpring } from "../../hooks/useEmmisiveSpring";
+import { FloatingCrystals } from "./floating-crystals";
 
 type InteractableCrystalProps = {
   mesh: Mesh | null;
@@ -72,6 +73,7 @@ export function InteractableCrystal({ mesh, isFocused, setIsFocused, ...props }:
         onPointerEnter={handlePointerEnter}
         onPointerLeave={handlePointerLeave}
       />
+      <FloatingCrystals rotation={[0, 0.5, 0]} parent={mesh} visible={isFocused} /> 
     </group>
   );
 }

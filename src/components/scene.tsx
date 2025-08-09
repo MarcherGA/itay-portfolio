@@ -1,8 +1,4 @@
-import { Canvas, useThree } from "@react-three/fiber";
-import {
-  OrbitControls,
-  useTexture
-} from "@react-three/drei";
+import { Canvas} from "@react-three/fiber";
 import { EffectComposer, Bloom, BrightnessContrast} from "@react-three/postprocessing";
 import * as THREE from "three";
 import { BranchesText } from "./branches-text";
@@ -12,10 +8,10 @@ import { SkyEnvironment } from "../components/sky/sky-environment";
 import { SceneResizer } from "./scene-resizer";
 import { useStatsOverlay } from "../hooks/useStatsOverlay";
 
-function Skybox() {
-  const texture = useTexture("textures/painted-sky.png");
-  return <primitive attach="background" object={texture} />;
-}
+// function Skybox() {
+//   const texture = useTexture("textures/painted-sky.png");
+//   return <primitive attach="background" object={texture} />;
+// }
 
 
 export default function Scene() {

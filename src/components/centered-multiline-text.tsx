@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef } from 'react'
-import { Group, Mesh, MeshStandardMaterial, RepeatWrapping, Texture } from 'three'
+import { Group, Mesh, MeshStandardMaterial, RepeatWrapping } from 'three'
 import { FontLoader, Font } from 'three/examples/jsm/Addons.js'
 import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js'
 import { useLoader } from '@react-three/fiber'

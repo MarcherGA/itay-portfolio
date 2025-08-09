@@ -1,7 +1,7 @@
 // components/SignGlowOverlay.tsx
-import { extend, useFrame } from '@react-three/fiber';
+import { useFrame } from '@react-three/fiber';
 import { useRef, useEffect, useState, useMemo } from 'react';
-import { Mesh, Object3D, BufferGeometry, Points, PointsMaterial } from 'three';
+import { Mesh, Object3D, BufferGeometry, Points} from 'three';
 import * as THREE from 'three';
 import { useSpring } from '@react-spring/three';
 
@@ -102,7 +102,6 @@ export function SignGlowOverlay({ mesh, hovered }: Props) {
       for (let i = 0; i < positions.count; i++) {
         const x = positions.getX(i);
         const y = positions.getY(i);
-        const z = positions.getZ(i);
 
         const intensity = 0.0001;// * Math.random();
         // const ySign = Math.random() ? 1 : -1;
