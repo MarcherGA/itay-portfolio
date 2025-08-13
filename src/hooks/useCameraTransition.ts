@@ -1,17 +1,78 @@
 import { useThree } from "@react-three/fiber";
 import gsap from "gsap";
+import { useRef } from "react";
 import * as THREE from "three";
 
 export function useCameraTransition() {
-  const { camera } = useThree();
+  const { camera, invalidate } = useThree();
+  const isTransitioningRef = useRef(false);
 
-  return (
+  function createControlledTransition(
+    fromPosition: THREE.Vector3,
+    fromLookAt: THREE.Vector3,
+    toPosition: THREE.Vector3,
+    toLookAt: THREE.Vector3,
+    duration = 1.5,
+    ease = "power2.inOut"
+  ) {
+    const tweenState = {
+      x: fromPosition.x,
+      y: fromPosition.y,
+      z: fromPosition.z,
+      lx: fromLookAt.x,
+      ly: fromLookAt.y,
+      lz: fromLookAt.z,
+    };
+
+    // Create a paused tween that animates tweenState from 0 to 1
+    const timeline = gsap.timeline({ paused: true });
+
+    timeline.to(tweenState, {
+      x: toPosition.x,
+      y: toPosition.y,
+      z: toPosition.z,
+      lx: toLookAt.x,
+      ly: toLookAt.y,
+      lz: toLookAt.z,
+      duration,
+      ease,
+      onUpdate: () => {
+        camera.position.set(tweenState.x, tweenState.y, tweenState.z);
+        camera.lookAt(tweenState.lx, tweenState.ly, tweenState.lz);
+        camera.updateMatrixWorld();
+        invalidate();
+      },
+      onComplete: () => {
+        isTransitioningRef.current = false;
+      },
+      onInterrupt: () => {
+        isTransitioningRef.current = false;
+      },
+    });
+
+    //timeline.invalidate();
+
+    timeline.play(0);
+    timeline.pause(0);
+    isTransitioningRef.current = false;
+
+
+    // Expose tweenState so you can control progress manually
+    return {
+      timeline,
+      tweenState,
+    };
+  }
+
+  function transition (
     toPosition: THREE.Vector3,
     lookAtTarget: THREE.Vector3,
     duration = 1.5,
     ease = 'power2.inOut',
     onComplete?: () => void
-  ) => {
+  ) {
+    if (isTransitioningRef.current) return;
+    isTransitioningRef.current = true;
     const fromPos = camera.position.clone();
     const fromLook = new THREE.Vector3();
     camera.getWorldDirection(fromLook);
@@ -41,7 +102,17 @@ export function useCameraTransition() {
         camera.position.set(tweenState.x, tweenState.y, tweenState.z);
         camera.lookAt(tweenState.lx, tweenState.ly, tweenState.lz);
       },
-      onComplete: onComplete,
+      onComplete: () => {
+        isTransitioningRef.current = false;
+        if (onComplete) onComplete();
+      },
+      onInterrupt: () => {
+        isTransitioningRef.current = false;
+      }
     });
+  };
+
+  return {
+    createControlledTransition, transition, isTransitioningRef
   };
 }

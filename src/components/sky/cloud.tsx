@@ -82,6 +82,21 @@ export function Clouds() {
       meshRef.current.setMatrixAt(i, matrices[i]);
     }
     meshRef.current.instanceMatrix.needsUpdate = true;
+
+      // Compute precise bounding sphere from all instances
+  const positions = [];
+  const dummy = new THREE.Object3D();
+  
+  for (let i = 0; i < COUNT; i++) {
+    dummy.applyMatrix4(matrices[i]);
+    positions.push(dummy.position.clone());
+  }
+  
+  const boundingSphere = new THREE.Sphere();
+  boundingSphere.setFromPoints(positions);
+  
+  
+  meshRef.current.boundingSphere = boundingSphere;
   }, [matrices]);
 
   useFrame((state) => {

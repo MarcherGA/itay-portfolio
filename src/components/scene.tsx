@@ -20,16 +20,13 @@ export default function Scene() {
 
   return (
     <Canvas
-      camera={{ position: [0, 3, 14], fov: 50, near: 0.1, far: 500 }}
+      camera={{ position: [0, 3, 14], fov: 50, near: 0.1, far: 500, type: "perspective" }}
       shadows
       style={{ background: "black" }}
       gl={{
         toneMapping: THREE.ReinhardToneMapping, // or THREE.NoToneMapping
-        outputColorSpace: THREE.SRGBColorSpace
-      }}
-      onCreated={(state) => {
-        state.camera.layers.enable(0);
-        state.camera.layers.enable(1);
+        outputColorSpace: THREE.SRGBColorSpace,
+        antialias: true
       }}
     >
       {/* Subtle fog for atmosphere */}
@@ -51,7 +48,7 @@ export default function Scene() {
       <Bloom
         intensity={0.8}
         luminanceThreshold={1.1}
-        luminanceSmoothing={0.2}
+        luminanceSmoothing={0.1}
         blendFunction={THREE.AdditiveBlending}
       />
       </EffectComposer>

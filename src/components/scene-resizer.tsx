@@ -1,19 +1,31 @@
 import { useEffect, useMemo } from 'react';
 import { useScreenSize } from '../hooks/useScreenSize';
 import { useThree } from '@react-three/fiber';
+import { PerspectiveCamera } from 'three';
 
 export function SceneResizer() {
-    const {scene} = useThree()
-    const [width] = useScreenSize();
-    const scale = useMemo(() => {
-        if (width < 480) return 0.4;
-        if (width < 768) return 0.5;
-        return 1;
-    }, [width]);
+  const { camera } = useThree();
+  const [width] = useScreenSize();
 
-    useEffect(() => {
-        scene.scale.set(scale, scale, scale);
-    }, [scene]);
+  const baseFov = 60;
+  const baseWidth = 1080;
+  const minFov = 50;
+  const maxFov = 80;
 
-  return null
+  const fov = useMemo(() => {
+    // Scale proportionally
+    const scaled = baseFov * (baseWidth / width);
+    // Clamp so it doesn't get too extreme
+    return Math.min(Math.max(scaled, minFov), maxFov);
+  }, [width]);
+
+  useEffect(() => {
+    if ('fov' in camera) {
+      const perspectiveCamera = camera as PerspectiveCamera;
+      perspectiveCamera.fov = fov;
+      perspectiveCamera.updateProjectionMatrix();
+    }
+  }, [camera, fov]);
+
+  return null;
 }

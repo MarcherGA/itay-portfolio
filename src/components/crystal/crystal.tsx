@@ -41,7 +41,7 @@ export function InteractableCrystal({ mesh, isFocused, setIsFocused, ...props }:
   const handleClick = () => {
     const finalCamPos = mesh!.getWorldPosition(new Vector3()).add(CRYSTAL_CAMERA_POSITION_OFFSET)
     const finalLookAt = mesh!.getWorldPosition(new Vector3()).add(CRYSTAL_LOOK_AT_OFFSET)
-    cameraTransition(finalCamPos, finalLookAt, undefined, undefined, ()=> setIsFocused(true));
+    cameraTransition.transition(finalCamPos, finalLookAt, undefined, undefined, ()=> setIsFocused(true));
     handlePointerLeave();
   };
 

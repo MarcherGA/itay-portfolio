@@ -13,8 +13,10 @@ type SignProps = {
 } & JSX.IntrinsicElements['group'];
 
 // These are relative to the mesh position
-const SIGN_CAMERA_POSITION_OFFSET = new Vector3(-1.29, 0.66, 1.13);
-const SIGN_LOOK_AT_OFFSET = new Vector3(-0.59, 0.38, 0.49);
+const SIGN_CAMERA_POSITION_OFFSET = new Vector3(-1.04, 0.61, 0.93);
+const SIGN_LOOK_AT_OFFSET = new Vector3(-0.34, 0.3, 0.29);
+// const SIGN_CAMERA_POSITION_OFFSET1 = new Vector3(-1.29, 0.66, 1.13);
+// const SIGN_LOOK_AT_OFFSET1 = new Vector3(-0.59, 0.38, 0.49);
 
 function SignComponent({ mesh, isFocused, setIsFocused, ...props }: SignProps) {
   const transitionToSign = useCameraTransition();
@@ -36,7 +38,7 @@ function SignComponent({ mesh, isFocused, setIsFocused, ...props }: SignProps) {
     const cameraPosition = worldPosition.clone().add(SIGN_CAMERA_POSITION_OFFSET);
     const lookAtTarget = worldPosition.clone().add(SIGN_LOOK_AT_OFFSET);
 
-    transitionToSign(cameraPosition, lookAtTarget, 1.5, undefined, () => {
+    transitionToSign.transition(cameraPosition, lookAtTarget, 1.5, undefined, () => {
       setIsFocused(true);
     });
 

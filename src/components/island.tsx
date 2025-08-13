@@ -1,23 +1,40 @@
 import { useGLTF } from "@react-three/drei";
-import { JSX, useEffect, useMemo, useState } from "react";
+import { JSX, useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import { MeshStandardMaterial, MeshToonMaterial } from "three";
 import { InteractableCrystal } from "./crystal/crystal";
 import { Sign } from "./sign/sign";
 import Avatar from "./avatar/avatar";
+import {  useFocusScrollManager } from "../hooks/useFocusScrollManager";
+import { FocusTarget, FocusTargetData } from "../types/focusTarget";
 
-type FocusTarget = "crystal" | "sign" | "avatar" | null;
+
 
 type FloatingIslandProps = {
   onLoad?: (nodes: Record<string, THREE.Object3D>) => void;
-} & JSX.IntrinsicElements['group'];
+} & JSX.IntrinsicElements["group"];
+
+const CRYSTAL_CAMERA_POSITION_OFFSET = new THREE.Vector3(0.9, 1.33, 2.53);
+const CRYSTAL_LOOK_AT_OFFSET = new THREE.Vector3(0.7, 1.37, 1.55);
+
+const SIGN_CAMERA_POSITION_OFFSET = new THREE.Vector3(-1.04, 0.61, 0.93);
+const SIGN_LOOK_AT_OFFSET = new THREE.Vector3(-0.34, 0.3, 0.29);
+
+const AVATAR_CAMERA_POSITION_OFFSET = new THREE.Vector3(1.844, 2.32, 2.14);
+const AVATAR_LOOK_AT_OFFSET = new THREE.Vector3(1.008, 2.17, 1.6);
+
+const HOME_CAMERA_POS = new THREE.Vector3(0, 3, 14);
+const HOME_LOOK_AT = new THREE.Vector3(0, 0, 0);
 
 export function FloatingIsland({ onLoad, ...groupProps }: FloatingIslandProps) {
   const { scene, nodes } = useGLTF("models/floating_island.glb") as unknown as {
     scene: THREE.Group;
     nodes: Record<string, THREE.Mesh>;
   };
-  const [focus, setFocus] = useState<FocusTarget>(null);
+  const [focus, setFocus] = useState<FocusTarget>(FocusTarget.home);
+
+  const avatarRef = useRef<{ group: THREE.Group | null }>(null);
+  const [avatarMesh, setAvatarMesh] = useState<THREE.Group | null>(null);
 
   const { island, crystal, sign } = useMemo(() => {
     return {
@@ -26,27 +43,96 @@ export function FloatingIsland({ onLoad, ...groupProps }: FloatingIslandProps) {
       sign: nodes["sign"] || nodes["Sign"],
     };
   }, [nodes]);
+  
+useEffect(() => {
+  if (avatarRef.current?.group) {
+    setAvatarMesh(avatarRef.current.group);
+  }
+}, [avatarRef.current?.group]);
 
-  // Replace island material with toon
+  // Build the targets array, safely handle avatarRef group not ready yet
+  const focusTargets: FocusTargetData[] = useMemo(
+    () => [
+      {
+        id: "avatar",
+        mesh: avatarMesh ?? null,
+        cameraOffset: AVATAR_CAMERA_POSITION_OFFSET,
+        lookAtOffset: AVATAR_LOOK_AT_OFFSET,
+      },
+      {
+        id: "sign",
+        mesh: sign ?? null,
+        cameraOffset: SIGN_CAMERA_POSITION_OFFSET,
+        lookAtOffset: SIGN_LOOK_AT_OFFSET,
+      },
+      {
+        id: "crystal",
+        mesh: crystal ?? null,
+        cameraOffset: CRYSTAL_CAMERA_POSITION_OFFSET,
+        lookAtOffset: CRYSTAL_LOOK_AT_OFFSET,
+      },
+    ],
+    [crystal, sign, avatarMesh]
+  );
+
+  // Replace island material with toon and optimize
   useEffect(() => {
     if (island?.material && !(island.material instanceof MeshToonMaterial)) {
       const toonMat = new MeshToonMaterial().copy(island.material as MeshStandardMaterial);
       island.material = toonMat;
     }
-    scene.traverse(obj => {
+    scene.traverse((obj) => {
       obj.frustumCulled = true;
       obj.matrixAutoUpdate = false;
     });
     onLoad?.(nodes);
-  }, []);
+  }, [island, scene, nodes, onLoad]);
+
+  const { setCurrentIndex, currentIndex } = useFocusScrollManager(focusTargets, {
+    cameraPos: HOME_CAMERA_POS,
+    lookAt: HOME_LOOK_AT,
+  }, 0.2);
+
+  function onFocusTarget(index: FocusTarget) {
+    setCurrentIndex(index);
+    setFocus(index);
+  }
+  useEffect(() => {
+    setFocus(currentIndex)
+  }, [currentIndex]);
+
+  function returnHome() {
+    setCurrentIndex(-1);
+    setFocus(FocusTarget.home);
+  }
 
   return (
-    <group raycast={()=>null} {...groupProps}>
+    <group raycast={() => null} {...groupProps}>
       <primitive object={scene} dispose={null} />
-      {crystal &&<InteractableCrystal mesh={crystal} isFocused={focus === "crystal"} setIsFocused={()=> setFocus("crystal")}    />
-      }
-      {sign && <Sign setIsFocused={()=> setFocus("sign")} isFocused={focus === "sign"}  mesh={sign} />}
-      <Avatar isFocused={focus === "avatar"} setIsFocused={()=>setFocus("avatar")} parent={island} scale={1.3} rotation={[0, Math.PI * 0.36, 0]} position={new THREE.Vector3(-1, -0.12, 2.1)}/>
+      {crystal && (
+        <InteractableCrystal
+          mesh={crystal}
+          isFocused={focus === FocusTarget.crystal}
+          setIsFocused={() => onFocusTarget(FocusTarget.crystal)}
+        />
+      )}
+      {sign && (
+        <Sign
+          setIsFocused={() => onFocusTarget(FocusTarget.sign)}
+          isFocused={focus === FocusTarget.sign}
+          mesh={sign}
+        />
+      )}
+      <Avatar
+        ref={avatarRef}
+        isFocused={focus === FocusTarget.avatar}
+        setIsFocused={() => onFocusTarget(FocusTarget.avatar)}
+        parent={island}
+        scale={1.3}
+        rotation={[0, Math.PI * 0.36, 0]}
+        position={new THREE.Vector3(-1, -0.12, 2.1)}
+      />
+      {/* You can add a button or UI somewhere here that calls returnHome */}
     </group>
   );
 }
