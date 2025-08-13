@@ -1,26 +1,29 @@
 import { useRef, useEffect, useState, useCallback } from "react";
 import * as THREE from "three";
 import { useCameraTransition } from "./useCameraTransition";
-import { FocusTargetData } from "../types/focusTarget";
+import { useFocusStore } from "./useFocusStore";
 
 export function useFocusScrollManager(
-  targets: FocusTargetData[],
+  //targets: FocusTargetData[],
   homePosition: { cameraPos: THREE.Vector3; lookAt: THREE.Vector3 },
   threshold?: number
 ) {
   const { createControlledTransition, isTransitioningRef } = useCameraTransition();
 
-  const [currentIndex, setCurrentIndex] = useState(-1); // -1 = home
-  const currentIndexRef = useRef(currentIndex);
-
-  useEffect(() => {
-    currentIndexRef.current = currentIndex;
-  }, [currentIndex]);
   
-
+  const { currentIndex, setCurrentIndex, targets } = useFocusStore();
   const cachedPositions = useRef<{ cameraPos: THREE.Vector3; lookAt: THREE.Vector3 }[]>([]);
   const forwardTimelineRef = useRef<gsap.core.Timeline | null>(null);
   const backwardTimelineRef = useRef<gsap.core.Timeline | null>(null);
+  
+  const storeRef = useRef(useFocusStore.getState());
+
+  useEffect(() => {
+    const unsub = useFocusStore.subscribe((state) => {
+      storeRef.current = state;
+    });
+    return () => unsub();
+  }, []);
 
   const progressRef = useRef(0);
   const velocityRef = useRef(0);
@@ -41,6 +44,7 @@ export function useFocusScrollManager(
         lookAt: worldPos.clone().add(lookAtOffset),
       };
     });
+    console.log('Cached positions:', cachedPositions.current);
   }, [targets, homePosition]);
 
   const setupTimelines = useCallback(
@@ -116,12 +120,13 @@ export function useFocusScrollManager(
     };
 
     const update = () => {
+        const { currentIndex, targets, setCurrentIndex } = storeRef.current;
         if (isTransitioningRef.current) return;
       if (Math.abs(velocityRef.current) > 0.0001) {
         let newProgress = progressRef.current + velocityRef.current;
 
-        const upper = currentIndexRef.current === targets.length - 1 ? 0 : 1;
-        const lower = currentIndexRef.current === -1 ? 0 : -1;
+        const upper = currentIndex === targets.length - 1 ? 0 : 1;
+        const lower = currentIndex === -1 ? 0 : -1;
         newProgress = Math.min(Math.max(newProgress, lower), upper);
 
         if (newProgress > 0 && forwardTimelineRef.current) {
@@ -138,16 +143,16 @@ export function useFocusScrollManager(
             velocityRef.current = 0;
             forwardTimelineRef.current.play();
             forwardTimelineRef.current.eventCallback("onComplete", () => {
-              setCurrentIndex((i) => i + 1);
-              setupTimelines(currentIndexRef.current + 1);
+              setCurrentIndex(currentIndex + 1);
+              setupTimelines(currentIndex + 1);
             });
           } else if (newProgress <= -threshold && backwardTimelineRef.current) {
             isTransitioningRef.current = true;
             velocityRef.current = 0;
             backwardTimelineRef.current.play();
             backwardTimelineRef.current.eventCallback("onComplete", () => {
-              setCurrentIndex((i) => i - 1);
-              setupTimelines(currentIndexRef.current - 1);
+                setCurrentIndex(currentIndex - 1);
+                setupTimelines(currentIndex - 1);
             });
           }
         }
@@ -173,11 +178,9 @@ export function useFocusScrollManager(
 
   useEffect(() => {
     setupTimelines(currentIndex);
-  }, [targets, currentIndex, setupTimelines]);
+  }, [targets, setupTimelines]);
 
   return {
-    currentIndex,
-    setCurrentIndex,
     forwardTimeline: forwardTimelineRef.current,
     backwardTimeline: backwardTimelineRef.current,
   };

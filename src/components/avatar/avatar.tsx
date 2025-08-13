@@ -104,6 +104,12 @@ const Avatar = forwardRef< { group: THREE.Group | null }, AvatarProps >(({ isFoc
     setHovered(false);
   }, []);
 
+  useEffect(() => {
+    if (!isFocused) {
+      setHovered(false)
+    }
+  }, [isFocused]);
+
   const speechProps = useMemo(() => ({
     hoverText: "Hi!",
     expandedText: content.About,

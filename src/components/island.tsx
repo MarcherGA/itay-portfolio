@@ -7,6 +7,7 @@ import { Sign } from "./sign/sign";
 import Avatar from "./avatar/avatar";
 import {  useFocusScrollManager } from "../hooks/useFocusScrollManager";
 import { FocusTarget, FocusTargetData } from "../types/focusTarget";
+import { useFocusStore } from "../hooks/useFocusStore";
 
 
 
@@ -31,7 +32,8 @@ export function FloatingIsland({ onLoad, ...groupProps }: FloatingIslandProps) {
     scene: THREE.Group;
     nodes: Record<string, THREE.Mesh>;
   };
-  const [focus, setFocus] = useState<FocusTarget>(FocusTarget.home);
+  //const [focus, setFocus] = useState<FocusTarget>(FocusTarget.home);
+  const {currentIndex, setCurrentIndex, setTargets} = useFocusStore();
 
   const avatarRef = useRef<{ group: THREE.Group | null }>(null);
   const [avatarMesh, setAvatarMesh] = useState<THREE.Group | null>(null);
@@ -75,6 +77,10 @@ useEffect(() => {
     [crystal, sign, avatarMesh]
   );
 
+  useEffect(() => {
+    setTargets(focusTargets);
+  }, [focusTargets]);
+
   // Replace island material with toon and optimize
   useEffect(() => {
     if (island?.material && !(island.material instanceof MeshToonMaterial)) {
@@ -88,22 +94,18 @@ useEffect(() => {
     onLoad?.(nodes);
   }, [island, scene, nodes, onLoad]);
 
-  const { setCurrentIndex, currentIndex } = useFocusScrollManager(focusTargets, {
+  const { } = useFocusScrollManager({
     cameraPos: HOME_CAMERA_POS,
     lookAt: HOME_LOOK_AT,
   }, 0.2);
 
   function onFocusTarget(index: FocusTarget) {
     setCurrentIndex(index);
-    setFocus(index);
   }
-  useEffect(() => {
-    setFocus(currentIndex)
-  }, [currentIndex]);
+
 
   function returnHome() {
     setCurrentIndex(-1);
-    setFocus(FocusTarget.home);
   }
 
   return (
@@ -112,20 +114,20 @@ useEffect(() => {
       {crystal && (
         <InteractableCrystal
           mesh={crystal}
-          isFocused={focus === FocusTarget.crystal}
+          isFocused={currentIndex === FocusTarget.crystal}
           setIsFocused={() => onFocusTarget(FocusTarget.crystal)}
         />
       )}
       {sign && (
         <Sign
           setIsFocused={() => onFocusTarget(FocusTarget.sign)}
-          isFocused={focus === FocusTarget.sign}
+          isFocused={currentIndex === FocusTarget.sign}
           mesh={sign}
         />
       )}
       <Avatar
         ref={avatarRef}
-        isFocused={focus === FocusTarget.avatar}
+        isFocused={currentIndex === FocusTarget.avatar}
         setIsFocused={() => onFocusTarget(FocusTarget.avatar)}
         parent={island}
         scale={1.3}

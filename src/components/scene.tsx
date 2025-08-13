@@ -54,7 +54,7 @@ export default function Scene() {
       </EffectComposer>
 
       {/* Island & Crystal */}
-      <FloatingIsland scale={1} rotation={[0, -Math.PI * 0.15, 0]} position={[-6, -0.5, -2]}/>
+      <FloatingIsland rotation={[0, -Math.PI * 0.15, 0]} position={[-6, -0.5, -2]}/>
       
       <BranchesText rotation={[0, -Math.PI * 0.08, 0]} position={[4.5,0,0]}/>
 
