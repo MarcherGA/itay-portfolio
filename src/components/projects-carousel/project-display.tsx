@@ -1,12 +1,11 @@
 // components/ui/ProjectDisplay.tsx
 import { Text } from '@react-three/drei';
-import { Mesh, Texture } from 'three';
+import {Texture } from 'three';
 import YTPlayer3D from '../YTPlayer'; // updated import
-import { useRef } from 'react';
-import { a, animated, SpringValue } from '@react-spring/three';
+import { animated, SpringValue } from '@react-spring/three';
+import { ProjectThumbnail } from './project-thumbnail';
 
 const AnimatedText = animated(Text);
-const AnimatedMeshBasicMaterial = a.meshBasicMaterial as unknown as React.FC<any>;
 
 type Props = {
   project: Project;
@@ -21,7 +20,7 @@ const CARD_WIDTH = 1.4;
 export default function ProjectDisplay({ focused = false, project, texture, visible, opacity }: Props) {
   const isImage = project.type === 'image';
   const isVideo = project.type === 'video';
-  const imageMeshRef = useRef<Mesh>(null);
+
 
   return (
     <group visible={visible}>
@@ -45,10 +44,7 @@ export default function ProjectDisplay({ focused = false, project, texture, visi
             {isVideo && project.videoId && (
               <YTPlayer3D visible={focused} key={project.videoId} videoId={project.videoId} opacity={opacity} />
             ) || isImage && texture && (
-              <mesh ref={imageMeshRef} scale={0.4} position={[0, 0.07, 0.01]}>
-                <planeGeometry args={[1.5, 0.9]} />
-                <AnimatedMeshBasicMaterial map={texture} transparent opacity={typeof opacity === 'number' ? opacity : opacity?.to(o => o)} />
-              </mesh>
+              <ProjectThumbnail focused={focused} link={project.link} texture={texture} opacity={opacity} />
             )}
           </>
         )}

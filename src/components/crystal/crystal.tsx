@@ -1,21 +1,17 @@
 import { Mesh, MeshStandardMaterial, MeshToonMaterial, Vector3 } from "three";
-import { useCameraTransition } from "../../hooks/useCameraTransition";
 import { JSX, useEffect, useRef } from "react";
 import { HitboxMesh } from "../hitbox-mesh";
 import { useEmissiveSpring } from "../../hooks/useEmmisiveSpring";
 import { FloatingCrystals } from "./floating-crystals";
 
 type InteractableCrystalProps = {
+  onClick?: () => void;
   mesh: Mesh | null;
   isFocused: boolean;
-  setIsFocused: (v: boolean) => void;
 } & JSX.IntrinsicElements["group"];
 
-const CRYSTAL_CAMERA_POSITION_OFFSET = new Vector3(0.9, 1.33, 2.53);
-const CRYSTAL_LOOK_AT_OFFSET = new Vector3(0.7, 1.37, 1.55);
 
-export function InteractableCrystal({ mesh, isFocused, setIsFocused, ...props }: InteractableCrystalProps) {
-  const cameraTransition = useCameraTransition();
+export function InteractableCrystal({ mesh, isFocused, onClick, ...props }: InteractableCrystalProps) {
   const clonedMaterialRef = useRef<MeshToonMaterial | null>(null);
   
 
@@ -39,9 +35,7 @@ export function InteractableCrystal({ mesh, isFocused, setIsFocused, ...props }:
 
 
   const handleClick = () => {
-    const finalCamPos = mesh!.getWorldPosition(new Vector3()).add(CRYSTAL_CAMERA_POSITION_OFFSET)
-    const finalLookAt = mesh!.getWorldPosition(new Vector3()).add(CRYSTAL_LOOK_AT_OFFSET)
-    cameraTransition.transition(finalCamPos, finalLookAt, undefined, undefined, ()=> setIsFocused(true));
+    onClick?.();
     handlePointerLeave();
   };
 

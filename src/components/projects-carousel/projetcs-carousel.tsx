@@ -125,6 +125,11 @@ export default function ProjectsCarousel({
               ? isTarget
               : false;
 
+              const interactive = isFocused &&
+              ((fadeState === 'idle' && isCurrent) ||
+              (fadeState === 'fadingOut' && isCurrent) ||
+              (fadeState === 'fadingIn' && isTarget));
+
           const texture =
             project.type === 'image' && project.image
               ? textureMap.get(project.image)
@@ -141,7 +146,7 @@ export default function ProjectsCarousel({
           return (
             <group key={i} visible={projectVisible}>
               <ProjectDisplay
-                focused={isFocused && isCurrent && fadeState === 'idle'}
+                focused={interactive}
                 project={project}
                 texture={texture}
                 opacity={opacity}

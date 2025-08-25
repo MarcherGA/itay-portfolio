@@ -4,7 +4,7 @@ import { useRef } from "react";
 import * as THREE from "three";
 
 export function useCameraTransition() {
-  const { camera, invalidate } = useThree();
+  const threeState = useThree(); // Get the whole state instead of destructuring
   const isTransitioningRef = useRef(false);
 
   function createControlledTransition(
@@ -15,6 +15,9 @@ export function useCameraTransition() {
     duration = 1.5,
     ease = "power2.inOut"
   ) {
+    // Always get fresh camera reference
+    const { camera, invalidate } = threeState.get();
+    
     const tweenState = {
       x: fromPosition.x,
       y: fromPosition.y,
@@ -24,7 +27,6 @@ export function useCameraTransition() {
       lz: fromLookAt.z,
     };
 
-    // Create a paused tween that animates tweenState from 0 to 1
     const timeline = gsap.timeline({ paused: true });
 
     timeline.to(tweenState, {
@@ -50,14 +52,10 @@ export function useCameraTransition() {
       },
     });
 
-    //timeline.invalidate();
-
     timeline.play(0);
     timeline.pause(0);
     isTransitioningRef.current = false;
 
-
-    // Expose tweenState so you can control progress manually
     return {
       timeline,
       tweenState,
@@ -71,7 +69,11 @@ export function useCameraTransition() {
     ease = 'power2.inOut',
     onComplete?: () => void
   ) {
+    // ALWAYS get fresh camera reference here instead of using closure
+    const { camera, invalidate } = threeState.get();
+    
     if (isTransitioningRef.current) return;
+    
     isTransitioningRef.current = true;
     const fromPos = camera.position.clone();
     const fromLook = new THREE.Vector3();
@@ -99,8 +101,11 @@ export function useCameraTransition() {
       duration,
       ease,
       onUpdate: () => {
+        // Use the fresh camera reference
         camera.position.set(tweenState.x, tweenState.y, tweenState.z);
         camera.lookAt(tweenState.lx, tweenState.ly, tweenState.lz);
+        camera.updateMatrixWorld();
+        invalidate();
       },
       onComplete: () => {
         isTransitioningRef.current = false;
@@ -113,6 +118,8 @@ export function useCameraTransition() {
   };
 
   return {
-    createControlledTransition, transition, isTransitioningRef
+    createControlledTransition, 
+    transition, 
+    isTransitioningRef
   };
 }

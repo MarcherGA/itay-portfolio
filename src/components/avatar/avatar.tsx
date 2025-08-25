@@ -3,7 +3,6 @@ import { useGLTF, useAnimations } from '@react-three/drei';
 import * as THREE from 'three';
 import { SkeletonUtils } from 'three-stdlib';
 import SpeechBubble from './speech-bubble';
-import { useCameraTransition } from '../../hooks/useCameraTransition';
 import { Vector3 } from 'three';
 import content from "../../data/content.json";
 import { HitboxMesh } from '../hitbox-mesh';
@@ -12,15 +11,13 @@ import { TypingAnimation } from '../../hooks/useTypingAnimation';
 const skeletonClone = SkeletonUtils.clone;
 
 type AvatarProps = {
+  onClick?: () => void;
   isFocused: boolean;
-  setIsFocused: (isFocused: boolean) => void;
   position?: Vector3;
 } & JSX.IntrinsicElements['group'];
 
-const AVATAR_CAMERA_POSITION_OFFSET = new Vector3(1.844, 2.32, 2.14);
-const AVATAR_LOOK_AT_OFFSET = new Vector3(1.008, 2.17, 1.6);
 
-const Avatar = forwardRef< { group: THREE.Group | null }, AvatarProps >(({ isFocused, setIsFocused, position, ...props }, ref) => {
+const Avatar = forwardRef< { group: THREE.Group | null }, AvatarProps >(({ onClick, isFocused, position, ...props }, ref) => {
   const { scene: glbScene, animations } = useGLTF('/models/avatar.glb');
   const avatar = useMemo(() => {
     const cloned = skeletonClone(glbScene);
@@ -39,9 +36,7 @@ const Avatar = forwardRef< { group: THREE.Group | null }, AvatarProps >(({ isFoc
   }, [glbScene]);
 
   const [hovered, setHovered] = useState(false);
-  const [isTransitioning, setIsTransitioning] = useState(false);
 
-  const cameraTransition = useCameraTransition();
 
   const group = useRef<THREE.Group>(null);
 
@@ -51,16 +46,7 @@ const Avatar = forwardRef< { group: THREE.Group | null }, AvatarProps >(({ isFoc
   }), []);
 
   const handleClick = () => {
-    if (!group.current) return;
-    const finalCamPos = group.current.getWorldPosition(new Vector3()).add(AVATAR_CAMERA_POSITION_OFFSET);
-    const finalLookAt = group.current.getWorldPosition(new Vector3()).add(AVATAR_LOOK_AT_OFFSET);
-
-    setIsTransitioning(true); // start transition
-
-    cameraTransition.transition(finalCamPos, finalLookAt, undefined, undefined, () => {
-      setIsFocused(true); // after transition, set focus
-      setIsTransitioning(false); // done transitioning
-    });
+    onClick?.();
   };
 
   const { actions } = useAnimations(animations, group);
@@ -113,12 +99,12 @@ const Avatar = forwardRef< { group: THREE.Group | null }, AvatarProps >(({ isFoc
   const speechProps = useMemo(() => ({
     hoverText: "Hi!",
     expandedText: content.About,
-    showOnHover: hovered || isTransitioning || isFocused,
+    showOnHover: hovered || isFocused,
     expanded: isFocused,
     expandDelay: 0,
     typingAnimation: 'blinking-line' as TypingAnimation,
     expandScaleSpeed: 6,
-  }), [hovered, isFocused, isTransitioning]);
+  }), [hovered, isFocused]);
 
   return (
     <group ref={group} position={position} {...props} dispose={null}>
@@ -144,11 +130,10 @@ useGLTF.preload('/models/avatar.glb');
 
 export default React.memo(Avatar, (prev, next) => {
   const sameFocus = prev.isFocused === next.isFocused;
-  const sameSetter = prev.setIsFocused === next.setIsFocused;
   const samePosition =
     prev.position && next.position
       ? prev.position.equals(next.position)
       : prev.position === next.position;
 
-  return sameFocus && sameSetter && samePosition;
+  return sameFocus  && samePosition;
 });

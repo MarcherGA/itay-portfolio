@@ -10,7 +10,8 @@ export type FocusTargetData = {
   
   export enum FocusTarget {
     home =-1,
-    avatar = 0,
-    sign = 1,
-    crystal = 2,
+    island = 0,
+    avatar = 1,
+    sign = 2,
+    crystal = 3,
   }

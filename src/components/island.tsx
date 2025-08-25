@@ -1,5 +1,5 @@
 import { useGLTF } from "@react-three/drei";
-import { JSX, useEffect, useMemo, useRef, useState } from "react";
+import { JSX, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import { MeshStandardMaterial, MeshToonMaterial } from "three";
 import { InteractableCrystal } from "./crystal/crystal";
@@ -8,6 +8,7 @@ import Avatar from "./avatar/avatar";
 import {  useFocusScrollManager } from "../hooks/useFocusScrollManager";
 import { FocusTarget, FocusTargetData } from "../types/focusTarget";
 import { useFocusStore } from "../hooks/useFocusStore";
+import { useCameraTransition } from "../hooks/useCameraTransition";
 
 
 
@@ -15,17 +16,17 @@ type FloatingIslandProps = {
   onLoad?: (nodes: Record<string, THREE.Object3D>) => void;
 } & JSX.IntrinsicElements["group"];
 
-const CRYSTAL_CAMERA_POSITION_OFFSET = new THREE.Vector3(0.9, 1.33, 2.53);
-const CRYSTAL_LOOK_AT_OFFSET = new THREE.Vector3(0.7, 1.37, 1.55);
+const CRYSTAL_CAMERA_POSITION_OFFSET = new THREE.Vector3(1.6, 1.5, 1.5);
+const CRYSTAL_LOOK_AT_OFFSET = new THREE.Vector3(0.3, 1.4, 0);
 
-const SIGN_CAMERA_POSITION_OFFSET = new THREE.Vector3(-1.04, 0.61, 0.93);
-const SIGN_LOOK_AT_OFFSET = new THREE.Vector3(-0.34, 0.3, 0.29);
+const SIGN_CAMERA_POSITION_OFFSET = new THREE.Vector3(-0.55, 0.61, 1.5);
+const SIGN_LOOK_AT_OFFSET = new THREE.Vector3(0, 0.15, 0);
 
-const AVATAR_CAMERA_POSITION_OFFSET = new THREE.Vector3(1.844, 2.32, 2.14);
-const AVATAR_LOOK_AT_OFFSET = new THREE.Vector3(1.008, 2.17, 1.6);
+const AVATAR_CAMERA_POSITION_OFFSET = new THREE.Vector3(0, 2.32, 2.8);
+const AVATAR_LOOK_AT_OFFSET = new THREE.Vector3(-0.65, 2.17, 1.6);
 
-const HOME_CAMERA_POS = new THREE.Vector3(0, 3, 14);
-const HOME_LOOK_AT = new THREE.Vector3(0, 0, 0);
+const HOME_CAMERA_POS = new THREE.Vector3(0, 3.5, 10);
+const HOME_LOOK_AT = new THREE.Vector3(0, 0.5, 0);
 
 export function FloatingIsland({ onLoad, ...groupProps }: FloatingIslandProps) {
   const { scene, nodes } = useGLTF("models/floating_island.glb") as unknown as {
@@ -55,6 +56,12 @@ useEffect(() => {
   // Build the targets array, safely handle avatarRef group not ready yet
   const focusTargets: FocusTargetData[] = useMemo(
     () => [
+      {
+        id: "up",
+        mesh: null,
+        cameraOffset: HOME_CAMERA_POS,
+        lookAtOffset: HOME_LOOK_AT,
+      },
       {
         id: "avatar",
         mesh: avatarMesh ?? null,
@@ -94,19 +101,35 @@ useEffect(() => {
     onLoad?.(nodes);
   }, [island, scene, nodes, onLoad]);
 
-  const { } = useFocusScrollManager({
-    cameraPos: HOME_CAMERA_POS,
-    lookAt: HOME_LOOK_AT,
+  const { getTargetPosition } = useFocusScrollManager({
+    cameraPos: new THREE.Vector3(0, 50, 14),
+    lookAt: new THREE.Vector3(0, 50, 0),
   }, 0.2);
+  const { transition } = useCameraTransition();
 
-  function onFocusTarget(index: FocusTarget) {
-    setCurrentIndex(index);
-  }
+  const handleFocusTarget = useCallback((targetId: FocusTarget) => {
+    const targetPosition = getTargetPosition(targetId);
+    if (!targetPosition) return;
+
+    transition(
+      targetPosition.cameraPos,
+      targetPosition.lookAt,
+      1.5,
+      'power2.inOut',
+      () => {
+        if (targetId !== -1) {
+          setCurrentIndex(targetId);
+        }
+      }
+    );
+  }, [getTargetPosition, transition, focusTargets, setCurrentIndex]);
+
 
 
   function returnHome() {
     setCurrentIndex(-1);
   }
+  
 
   return (
     <group raycast={() => null} {...groupProps}>
@@ -115,12 +138,12 @@ useEffect(() => {
         <InteractableCrystal
           mesh={crystal}
           isFocused={currentIndex === FocusTarget.crystal}
-          setIsFocused={() => onFocusTarget(FocusTarget.crystal)}
+          onClick={() => handleFocusTarget(FocusTarget.crystal)}
         />
       )}
       {sign && (
         <Sign
-          setIsFocused={() => onFocusTarget(FocusTarget.sign)}
+          onClick={() => handleFocusTarget(FocusTarget.sign)}
           isFocused={currentIndex === FocusTarget.sign}
           mesh={sign}
         />
@@ -128,7 +151,7 @@ useEffect(() => {
       <Avatar
         ref={avatarRef}
         isFocused={currentIndex === FocusTarget.avatar}
-        setIsFocused={() => onFocusTarget(FocusTarget.avatar)}
+        onClick={() => handleFocusTarget(FocusTarget.avatar)}
         parent={island}
         scale={1.3}
         rotation={[0, Math.PI * 0.36, 0]}
@@ -138,3 +161,4 @@ useEffect(() => {
     </group>
   );
 }
+useGLTF.preload("models/floating_island.glb");

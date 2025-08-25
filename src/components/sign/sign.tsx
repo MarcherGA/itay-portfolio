@@ -1,6 +1,5 @@
 import { JSX, useCallback, useEffect, useRef, useState } from 'react';
-import { Mesh, Vector3 } from 'three';
-import { useCameraTransition } from '../../hooks/useCameraTransition';
+import { Mesh } from 'three';
 import ProjectsCarousel from '../projects-carousel/projetcs-carousel';
 import { SignRunesOverlay } from './sign-runes-overlay';
 import { HitboxMesh } from '../hitbox-mesh';
@@ -9,17 +8,10 @@ import React from 'react';
 type SignProps = {
   mesh: Mesh | null;
   isFocused: boolean;
-  setIsFocused: (v: boolean) => void;
+  onClick?: () => void;
 } & JSX.IntrinsicElements['group'];
 
-// These are relative to the mesh position
-const SIGN_CAMERA_POSITION_OFFSET = new Vector3(-1.04, 0.61, 0.93);
-const SIGN_LOOK_AT_OFFSET = new Vector3(-0.34, 0.3, 0.29);
-// const SIGN_CAMERA_POSITION_OFFSET1 = new Vector3(-1.29, 0.66, 1.13);
-// const SIGN_LOOK_AT_OFFSET1 = new Vector3(-0.59, 0.38, 0.49);
-
-function SignComponent({ mesh, isFocused, setIsFocused, ...props }: SignProps) {
-  const transitionToSign = useCameraTransition();
+function SignComponent({ mesh, isFocused, onClick, ...props }: SignProps) {
 
   const [hovered, setHovered] = useState(false);
   const [carouselIndex, setCarouselIndex] = useState(0);
@@ -30,17 +22,7 @@ function SignComponent({ mesh, isFocused, setIsFocused, ...props }: SignProps) {
   }, [mesh]);
 
   const handleClick = () => {
-    if (isFocused || !mesh) return;
-
-    const worldPosition = new Vector3();
-    mesh.getWorldPosition(worldPosition);
-
-    const cameraPosition = worldPosition.clone().add(SIGN_CAMERA_POSITION_OFFSET);
-    const lookAtTarget = worldPosition.clone().add(SIGN_LOOK_AT_OFFSET);
-
-    transitionToSign.transition(cameraPosition, lookAtTarget, 1.5, undefined, () => {
-      setIsFocused(true);
-    });
+    onClick?.();
 
   };
 

@@ -1,17 +1,12 @@
 import { Canvas} from "@react-three/fiber";
 import { EffectComposer, Bloom, BrightnessContrast} from "@react-three/postprocessing";
 import * as THREE from "three";
-import { BranchesText } from "./branches-text";
 import { FloatingIsland } from "../components/island";
-import { CameraLogger } from "../components/camera-logger";
 import { SkyEnvironment } from "../components/sky/sky-environment";
 import { SceneResizer } from "./scene-resizer";
 import { useStatsOverlay } from "../hooks/useStatsOverlay";
-
-// function Skybox() {
-//   const texture = useTexture("textures/painted-sky.png");
-//   return <primitive attach="background" object={texture} />;
-// }
+import { CloudText } from "./cloud-text";
+import { PerspectiveCamera } from "@react-three/drei";
 
 
 export default function Scene() {
@@ -20,7 +15,6 @@ export default function Scene() {
 
   return (
     <Canvas
-      camera={{ position: [0, 3, 14], fov: 50, near: 0.1, far: 500, type: "perspective" }}
       shadows
       style={{ background: "black" }}
       gl={{
@@ -29,6 +23,13 @@ export default function Scene() {
         antialias: true
       }}
     >
+        <PerspectiveCamera 
+    makeDefault
+    position={[0, 50, 14]} 
+    fov={50} 
+    near={0.1} 
+    far={500}
+  />
       {/* Subtle fog for atmosphere */}
       <fog attach="fog" args={["#fceee8", 10, 75]} />
 
@@ -54,11 +55,11 @@ export default function Scene() {
       </EffectComposer>
 
       {/* Island & Crystal */}
-      <FloatingIsland rotation={[0, -Math.PI * 0.15, 0]} position={[-6, -0.5, -2]}/>
+      <FloatingIsland rotation={[0, -Math.PI * 0.22, 0]} position={[0, -0.5, -2]}/>
       
-      <BranchesText rotation={[0, -Math.PI * 0.08, 0]} position={[4.5,0,0]}/>
+      <CloudText text="Welcome to
+Itay's Island"/>
 
-      <CameraLogger/>
       <SceneResizer/>
 
 
