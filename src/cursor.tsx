@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import './cursor.css';
 
-//const INTERACTIVE_TAGS = ['A', 'BUTTON', 'LABEL', 'INPUT', 'TEXTAREA'];
+const INTERACTIVE_TAGS = ['A', 'BUTTON', 'LABEL', 'INPUT', 'TEXTAREA'];
 
 export function Cursor() {
   useEffect(() => {
@@ -18,42 +18,47 @@ export function Cursor() {
     return () => document.removeEventListener('mousemove', move);
   }, []);
 
-//   useEffect(() => {
-//     const handleEnter = (e: Event) => {
-//       const target = e.target as HTMLElement;
-//       const isInteractive =
-//         INTERACTIVE_TAGS.includes(target.tagName) ||
-//         target.getAttribute('role') === 'button' ||
-//         target.onclick !== null ||
-//         target.classList.contains('r3f-clickable');
+  useEffect(() => {
+    const handleEnter = (e: Event) => {
+      const target = e.target as HTMLElement;
+      if (!target || typeof target.getAttribute !== 'function') return;
+      
+      const isInteractive =
+        INTERACTIVE_TAGS.includes(target.tagName) ||
+        target.getAttribute('role') === 'button' ||
+        target.classList?.contains('r3f-clickable') ||
+        target.classList?.contains('cursor-interactive');
 
-//       if (isInteractive) {
-//         document.body.classList.add('hovering-interactive');
-//       }
-//     };
+      if (isInteractive) {
+        document.body.classList.add('hovering-interactive');
+      }
+    };
 
-//     const handleLeave = (e: Event) => {
-//       const target = e.target as HTMLElement;
-//       const isInteractive =
-//         INTERACTIVE_TAGS.includes(target.tagName) ||
-//         target.getAttribute('role') === 'button' ||
-//         target.onclick !== null ||
-//         target.classList.contains('r3f-clickable');
+    const handleLeave = (e: Event) => {
+      const target = e.target as HTMLElement;
+      if (!target || typeof target.getAttribute !== 'function') return;
+      
+      const isInteractive =
+        INTERACTIVE_TAGS.includes(target.tagName) ||
+        target.getAttribute('role') === 'button' ||
+        target.onclick !== null ||
+        target.classList?.contains('r3f-clickable') ||
+        target.classList?.contains('cursor-interactive');
 
-//       if (isInteractive) {
-//         document.body.classList.remove('hovering-interactive');
-//       }
-//     };
+      if (isInteractive) {
+        document.body.classList.remove('hovering-interactive');
+      }
+    };
 
-//     // Delegate enter/leave events on the whole document
-//     document.addEventListener('mouseenter', handleEnter, true);
-//     document.addEventListener('mouseleave', handleLeave, true);
+    // Delegate enter/leave events on the whole document
+    document.addEventListener('mouseenter', handleEnter, true);
+    document.addEventListener('mouseleave', handleLeave, true);
 
-//     return () => {
-//       document.removeEventListener('mouseenter', handleEnter, true);
-//       document.removeEventListener('mouseleave', handleLeave, true);
-//     };
-//   }, []);
+    return () => {
+      document.removeEventListener('mouseenter', handleEnter, true);
+      document.removeEventListener('mouseleave', handleLeave, true);
+    };
+  }, []);
 
   return <div id="cursor-pulse" />;
 }

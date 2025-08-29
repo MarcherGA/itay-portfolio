@@ -13,9 +13,9 @@ type StarrySkyboxProps = {
 
 export function StarrySkybox({
   count = 2000,
-  radius = 500,
+  radius = 150,
   color = "white",
-  size = 0.5,
+  size = 0.3,
   rotationSpeed = 0.0001,
 }: StarrySkyboxProps) {
   const pointsRef = useRef<THREE.Points>(null);

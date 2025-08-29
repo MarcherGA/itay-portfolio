@@ -1,9 +1,28 @@
 body {
-    cursor: url('/cursors/crystal-styled-cursor.png') 24 24, auto;
+    cursor: url('/cursors/crystal-styled-cursor.png') 4 4, auto;
   }
+
   
   body.hovering-interactive {
-    cursor: url('/cursors/crystal-styled-cursor-hover.png') 24 24, auto;
+    cursor: url('/cursors/crystal-styled-cursor-hover.png') 4 4, auto;
+  }
+
+  /* Ensure custom cursor works on interactive elements */
+  .cursor-interactive {
+    cursor: url('/cursors/crystal-styled-cursor.png') 4 4, auto !important;
+  }
+
+  body.hovering-interactive .cursor-interactive {
+    cursor: url('/cursors/crystal-styled-cursor-hover.png') 4 4, auto !important;
+  }
+
+  /* Override default button cursor */
+  button.cursor-interactive {
+    cursor: url('/cursors/crystal-styled-cursor.png') 4 4, auto !important;
+  }
+
+  body.hovering-interactive button.cursor-interactive {
+    cursor: url('/cursors/crystal-styled-cursor-hover.png') 4 4, auto !important;
   }
   
   

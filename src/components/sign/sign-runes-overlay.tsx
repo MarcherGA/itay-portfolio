@@ -17,7 +17,7 @@ export function SignRunesOverlay({ hovered, isFocused, mesh, carouselIndex }: Pr
     (hovered && !isFocused) || activeRunes.includes(id);
 
   return (
-    <group>
+    <group parent={mesh.current}>
       <Rune position={[0.66, -0.05, 0.42]} rotation={[-Math.PI * 0.1, -Math.PI * 0.1, Math.PI * 0.8]} scale={0.2} runeType="inguz" isGlowing={isRuneGlowing('inguz')} />
       <Rune position={[0.68, 0.25, 0.325]} rotation={[-Math.PI * 0.1, -Math.PI * 0.1, Math.PI * 1.04]} scale={0.2} runeType="fehu" isGlowing={isRuneGlowing('fehu')} />
       <Rune position={[-0.75, 0.025, -0.14]} rotation={[-Math.PI * 0.1, -Math.PI * 0.1, Math.PI * 1.04]} scale={0.2} runeType="raido" isGlowing={isRuneGlowing('raido')} />

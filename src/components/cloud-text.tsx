@@ -7,7 +7,8 @@ type CloudTextProps = {
   font?: string
   color?: string
   fontSize?: number
-  scale?: number
+  scale?: number,
+  position?: [number, number, number]
 }
 
 export function CloudText({
@@ -16,6 +17,7 @@ export function CloudText({
   color = "#2a9d8f",
   fontSize = 60,
   scale = 0.08,
+  position = [0, 0, 0],
 }: CloudTextProps) {
   const { camera } = useThree()
   const meshRef = useRef<THREE.InstancedMesh>(null)
@@ -144,8 +146,9 @@ export function CloudText({
 
   return (
     <instancedMesh
+    frustumCulled={true}
         scale={0.7}
-        position={[0, 50, 0]}
+        position={position}
       ref={meshRef}
       args={[geometry, material, particles.length]}
     />

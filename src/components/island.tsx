@@ -9,6 +9,7 @@ import {  useFocusScrollManager } from "../hooks/useFocusScrollManager";
 import { FocusTarget, FocusTargetData } from "../types/focusTarget";
 import { useFocusStore } from "../hooks/useFocusStore";
 import { useCameraTransition } from "../hooks/useCameraTransition";
+import { invalidate } from "@react-three/fiber";
 
 
 
@@ -35,6 +36,7 @@ export function FloatingIsland({ onLoad, ...groupProps }: FloatingIslandProps) {
   };
   //const [focus, setFocus] = useState<FocusTarget>(FocusTarget.home);
   const {currentIndex, setCurrentIndex, setTargets} = useFocusStore();
+  
 
   const avatarRef = useRef<{ group: THREE.Group | null }>(null);
   const [avatarMesh, setAvatarMesh] = useState<THREE.Group | null>(null);
@@ -94,12 +96,24 @@ useEffect(() => {
       const toonMat = new MeshToonMaterial().copy(island.material as MeshStandardMaterial);
       island.material = toonMat;
     }
+  
     scene.traverse((obj) => {
-      obj.frustumCulled = true;
+      obj.frustumCulled = false; // keep rendered even offscreen
       obj.matrixAutoUpdate = false;
     });
+  
+    // warm up: render a few hidden frames so GPU compiles shaders
+    let i = 0;
+    const id = setInterval(() => {
+      // invalidate forces one render pass
+      // import { invalidate } from '@react-three/fiber'
+      invalidate();
+      if (++i > 8) clearInterval(id);
+    }, 60);
+  
     onLoad?.(nodes);
   }, [island, scene, nodes, onLoad]);
+  
 
   const { getTargetPosition } = useFocusScrollManager({
     cameraPos: new THREE.Vector3(0, 50, 14),

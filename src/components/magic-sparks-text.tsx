@@ -20,7 +20,7 @@ export function MagicSparksText({
   hueRange = 60, // Range of hue variation
   fontSize = 60,
   scale = 0.08,
-  sparkIntensity = 0.8,
+  sparkIntensity = 0.3,
   position = [0, 0, 0],
 }: MagicSparksTextProps) {
   const { camera } = useThree()
@@ -28,40 +28,20 @@ export function MagicSparksText({
   const dummy = useMemo(() => new THREE.Object3D(), [])
   const [particles, setParticles] = useState<any[]>([])
   const [stringBox, setStringBox] = useState({ wScene: 0, hScene: 0 })
+  
+  // Performance monitoring and optimization
+  const frameTimeRef = useRef<number[]>([])
+  const lastFrameTime = useRef(performance.now())
+  const [particleDensity, setParticleDensity] = useState(1) // Start with every 2 pixels
+  
+  // Memory optimization - reuse objects
+  const tempVector = useMemo(() => new THREE.Vector3(), [])
+  const tempQuaternion = useMemo(() => new THREE.Quaternion(), [])
 
-  // Create a sparkle/star texture programmatically
+  // Use existing magic spark texture instead of generating complex one
   const texture = useMemo(() => {
-    const canvas = document.createElement('canvas')
-    const ctx = canvas.getContext('2d')!
-    canvas.width = 64
-    canvas.height = 64
-    
-    const center = 32
-    const gradient = ctx.createRadialGradient(center, center, 0, center, center, center)
-    gradient.addColorStop(0, 'rgba(255, 255, 255, 1)')
-    gradient.addColorStop(0.3, 'rgba(255, 255, 255, 0.8)')
-    gradient.addColorStop(0.6, 'rgba(255, 255, 255, 0.3)')
-    gradient.addColorStop(1, 'rgba(255, 255, 255, 0)')
-    
-    ctx.fillStyle = gradient
-    ctx.fillRect(0, 0, 64, 64)
-    
-    // Add cross pattern for sparkle effect
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.9)'
-    ctx.fillRect(30, 10, 4, 44)
-    ctx.fillRect(10, 30, 44, 4)
-    
-    // Add diagonal lines
-    ctx.save()
-    ctx.translate(center, center)
-    ctx.rotate(Math.PI / 4)
-    ctx.fillRect(-2, -20, 4, 40)
-    ctx.fillRect(-20, -2, 40, 4)
-    ctx.restore()
-    
-    const texture = new THREE.CanvasTexture(canvas)
-    texture.needsUpdate = true
-    return texture
+    const loader = new THREE.TextureLoader()
+    return loader.load("/textures/magic-spark.png")
   }, [])
 
   // Draw text on canvas and sample coordinates
@@ -97,45 +77,80 @@ export function MagicSparksText({
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
     const pts: any[] = []
 
-    // Sample every pixel like the original (no spacing)
-    for (let y = 0; y < canvas.height; y++) {
-      for (let x = 0; x < canvas.width; x++) {
+    // Use adaptive particle density for performance
+    for (let y = 0; y < canvas.height; y += particleDensity) {
+      for (let x = 0; x < canvas.width; x += particleDensity) {
         const alpha = imageData.data[(y * canvas.width + x) * 4 + 3]
-        if (alpha > 0) { // Keep all pixels like original
+        if (alpha > 0) {
           pts.push({
             x: x * scale + 0.3 * (Math.random() - 0.5),
             y: y * scale + 0.3 * (Math.random() - 0.5),
-            z: 0.2 * (Math.random() - 0.5), // Add some depth
+            z: 0.1 * (Math.random() - 0.5),
             isGrowing: true,
             toDelete: false,
             scale: 0,
-            maxScale: 0.2 + 2.0 * Math.pow(Math.random(), 8), // Larger, more varied scales
-            deltaScale: 0.02 + 0.04 * Math.random(),
+            maxScale: 0.1 + 1.2 * Math.pow(Math.random(), 6),
+            deltaScale: 0.02 + 0.03 * Math.random(),
             age: Math.PI * 2 * Math.random(),
-            ageDelta: 0.02 + 0.03 * Math.random(), // Faster animation
+            ageDelta: 0.015 + 0.02 * Math.random(),
             rotationZ: Math.PI * 2 * Math.random(),
-            deltaRotation: 0.02 * (Math.random() - 0.5), // Faster rotation
-            twinkle: Math.random() * Math.PI * 2, // For twinkling effect
-            twinkleDelta: 0.05 + 0.05 * Math.random(),
-            color: baseHue + (Math.random() - 0.5) * hueRange, // Hue variation around base
+            deltaRotation: 0.01 * (Math.random() - 0.5),
+            twinkle: Math.random() * Math.PI * 2,
+            twinkleDelta: 0.03 + 0.03 * Math.random(),
           })
         }
       }
     }
     setParticles(pts)
-  }, [text, font, fontSize, scale, baseHue, hueRange])
+  }, [text, font, fontSize, scale, baseHue, hueRange, particleDensity])
 
-  // Animate particles with sparkle effects
-  useFrame((state) => {
+  // Animate particles with performance monitoring and adaptive quality
+  useFrame(() => {
     if (!meshRef.current || particles.length === 0) return
     
-    particles.forEach((p, i) => {
+    // Performance monitoring
+    const currentTime = performance.now()
+    const frameTime = currentTime - lastFrameTime.current
+    lastFrameTime.current = currentTime
+    
+    // Track frame times for performance analysis
+    frameTimeRef.current.push(frameTime)
+    if (frameTimeRef.current.length > 60) { // Keep last 60 frames
+      frameTimeRef.current.shift()
+    }
+    
+    // Adaptive quality adjustment every 60 frames
+    if (frameTimeRef.current.length === 60) {
+      const avgFrameTime = frameTimeRef.current.reduce((a, b) => a + b, 0) / 60
+      const fps = 1000 / avgFrameTime
+      
+      // // Adjust particle density based on performance
+      // if (fps < 120 && particleDensity < 4) {
+      //   setParticleDensity(prev => Math.min(prev + 1, 4)) // Reduce particles
+      // } else if (fps > 200 && particleDensity > 1) {
+      //   setParticleDensity(prev => Math.max(prev - 1, 1)) // Increase particles
+      // }
+      
+      frameTimeRef.current = [] // Reset for next measurement
+    }
+    
+    // Calculate camera distance for LOD (Level of Detail)
+    tempVector.set(position[0], position[1], position[2])
+    const distanceToCamera = camera.position.distanceTo(tempVector)
+    const lodFactor = Math.min(1, 10 / distanceToCamera) // Reduce detail at distance
+    
+    // Batch process particles with LOD optimization
+    const updateStep = Math.max(1, Math.floor(1 / lodFactor))
+    
+    for (let i = 0; i < particles.length; i += updateStep) {
+      const p = particles[i]
+      
       p.age += p.ageDelta
       p.twinkle += p.twinkleDelta
 
       // Growth logic matching original
       if (p.isGrowing) {
-        p.deltaScale *= 0.99 // Damping like original
+        p.deltaScale *= 0.99
         p.scale += p.deltaScale
         if (p.scale >= p.maxScale) {
           p.isGrowing = false
@@ -145,9 +160,9 @@ export function MagicSparksText({
         p.scale -= p.deltaScale
         if (p.scale <= 0) p.scale = 0
       } else {
-        // Breathing effect like original flowers
-        p.scale = p.maxScale + 0.2 * Math.sin(p.age)
-        p.rotationZ += 0.001 * Math.cos(p.age) // Subtle rotation like original
+        // Simplified breathing effect - reduced trigonometric calculations
+        p.scale = p.maxScale + 0.1 * Math.sin(p.age)
+        p.rotationZ += p.deltaRotation
       }
 
       // Position exactly like original - flip Y coordinate
@@ -157,12 +172,12 @@ export function MagicSparksText({
         p.z
       )
       
-      // Scale with gentle twinkling
-      const twinkleScale = 0.9 + 0.2 * Math.sin(p.twinkle)
+      // Simplified scale with reduced twinkling calculations
+      const twinkleScale = 0.95 + 0.1 * Math.sin(p.twinkle)
       dummy.scale.set(
-        p.scale * twinkleScale, 
-        p.scale * twinkleScale, 
-        p.scale * twinkleScale
+        p.scale * twinkleScale * lodFactor, 
+        p.scale * twinkleScale * lodFactor, 
+        p.scale * twinkleScale * lodFactor
       )
       
       // Billboarding like original
@@ -172,36 +187,40 @@ export function MagicSparksText({
       dummy.updateMatrix()
       meshRef.current!.setMatrixAt(i, dummy.matrix)
       
-      // Set individual particle color with twinkling hue shift
-      meshRef.current!.setColorAt(i, new THREE.Color(`hsl(${p.color + Math.sin(p.twinkle) * 10},100%,70%)`))
-    })
+      // Fill in skipped particles with same transform for visual continuity
+      for (let j = 1; j < updateStep && i + j < particles.length; j++) {
+        meshRef.current!.setMatrixAt(i + j, dummy.matrix)
+      }
+    }
     
     meshRef.current.instanceMatrix.needsUpdate = true
-    if (meshRef.current.instanceColor) {
-      meshRef.current.instanceColor.needsUpdate = true
-    }
   })
 
-  // Create material with per-instance coloring
+  // Create material similar to cloud text for better performance
   const material = useMemo(() => {
+    // Create a golden color based on baseHue
+    const goldColor = new THREE.Color(`hsl(${baseHue}, 80%, 65%)`)
+    
     return new THREE.MeshBasicMaterial({
+      color: goldColor,
       map: texture,
       depthTest: false,
       opacity: sparkIntensity,
       transparent: true,
-      blending: THREE.AdditiveBlending, // Additive blending for glow effect
+      // Use standard blending instead of additive for better performance
     })
-  }, [texture, sparkIntensity])
+  }, [texture, sparkIntensity, baseHue])
 
   const geometry = useMemo(() => new THREE.PlaneGeometry(1, 1), [])
 
   return (
     <instancedMesh
-      scale={0.6}
+    frustumCulled={true}
+
+      scale={0.7}
       position={position}
       ref={meshRef}
       args={[geometry, material, particles.length]}
     />
   )
 }
-
