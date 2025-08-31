@@ -10,11 +10,8 @@ export function useScrollHint() {
     let resetTimer: ReturnType<typeof setTimeout>;
     let cycleTimer: ReturnType<typeof setTimeout>;
 
-    console.log('useScrollHint effect - currentIndex:', currentIndex);
-
     // Only track inactivity when on home target (currentIndex === -1)
     if (currentIndex === -1) {
-      console.log('Setting up scroll hint for home target');
       const startHintCycle = () => {
         setShowHint(true);
         
@@ -63,13 +60,11 @@ export function useScrollHint() {
         clearTimeout(cycleTimer);
       };
     } else {
-      console.log('Not on home target, hiding hint');
       setShowHint(false);
     }
 
     // Cleanup function
     return () => {
-      console.log('Cleaning up scroll hint timers');
       clearTimeout(inactivityTimer);
       clearTimeout(resetTimer);
       clearTimeout(cycleTimer);

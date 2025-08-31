@@ -1,6 +1,5 @@
 import { a, useSpring } from "@react-spring/three";
-import { Float, useGLTF } from "@react-three/drei";
-import { useLoader } from "@react-three/fiber";
+import { Float, useGLTF, useTexture } from "@react-three/drei";
 import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { Group } from "three";
@@ -28,7 +27,7 @@ export function FloatingCrystal({
 }: Props) {
   const groupRef = useRef<Group>(null!);
   const gltf = useGLTF(modelUrl);
-  const texture = useLoader(THREE.TextureLoader, iconTextureUrl);
+  const texture = useTexture(iconTextureUrl);
   const [hitboxEnabled, setHitboxEnabled] = useState(false);
 
   const emissiveMaterialRef = useRef(

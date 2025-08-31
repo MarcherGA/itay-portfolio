@@ -12,7 +12,7 @@ type Props = {
 
 export function RuneDecal({ mesh, isGlowing, runeType = 'algiz', ...props }: Props) {
   const textures = useRuneTextures();
-  const texture = textures[runeType];
+  const texture = textures ? textures[runeType] : undefined;
   const { materialProps } = useGlowingMaterial(isGlowing, texture);
 
   if (!mesh.current) return null;

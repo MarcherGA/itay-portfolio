@@ -10,7 +10,7 @@ type Props = {
 
 export function Rune({ isGlowing, runeType = 'algiz', ...props }: Props) {
   const textures = useRuneTextures();
-  const texture = textures[runeType];
+  const texture = textures ? textures[runeType] : undefined;
   const { materialProps } = useGlowingMaterial(isGlowing, texture);
 
   return (

@@ -1,4 +1,4 @@
-import { Canvas} from "@react-three/fiber";
+import { Canvas } from "@react-three/fiber";
 import { EffectComposer, Bloom, BrightnessContrast} from "@react-three/postprocessing";
 import * as THREE from "three";
 import { FloatingIsland } from "../components/island";
@@ -8,34 +8,28 @@ import { SceneResizer } from "./scene-resizer";
 import { useStatsOverlay } from "../hooks/useStatsOverlay";
 import { CloudText } from "./cloud-text";
 import { MagicSparksText } from "./magic-sparks-text";
-import { PerspectiveCamera } from "@react-three/drei";
+import { PerspectiveCamera} from "@react-three/drei";
 import { NavigationController } from "./navigation-controller";
 import { useThemeStore } from "../hooks/useThemeStore";
+import { LoadingScreen } from "./loading-screen";
+import { Suspense, useEffect, useRef} from "react";
+import { useCustomLoadingManager } from "../hooks/useCustomLoadingManager";
 
 
-export default function Scene() {
+// Scene content component
+function SceneContent() {
   const { mode } = useThemeStore();
   const isDark = mode === 'dark';
 
-  useStatsOverlay();
-
   return (
-    <Canvas
-      shadows
-      style={{ background: "black" }}
-      gl={{
-        toneMapping: THREE.ReinhardToneMapping, // or THREE.NoToneMapping
-        outputColorSpace: THREE.SRGBColorSpace,
-        antialias: true
-      }}
-    >
-        <PerspectiveCamera 
-    makeDefault
-    position={[0, 50, 14]} 
-    fov={50} 
-    near={0.1} 
-    far={500}
-  />
+    <>
+      <PerspectiveCamera 
+        makeDefault
+        position={[0, 50, 14]} 
+        fov={50} 
+        near={0.1} 
+        far={500}
+      />
 
       {/* Theme-based sky background */}
       {isDark ? <StarrySkybox /> : <SkyEnvironment />}
@@ -59,16 +53,16 @@ export default function Scene() {
 
       {/* Theme-based bloom effect */}
       <EffectComposer multisampling={8}>
-      <BrightnessContrast 
-        brightness={isDark ? 0.025 : 0.05} 
-        contrast={isDark ? 0.32 : 0.2} 
-      />
-      <Bloom
-        intensity={isDark ? 0.9 : 0.8}
-        luminanceThreshold={isDark ? 0.9 : 1.1}
-        luminanceSmoothing={0.1}
-        blendFunction={THREE.AdditiveBlending}
-      />
+        <BrightnessContrast 
+          brightness={isDark ? 0.025 : 0.05} 
+          contrast={isDark ? 0.32 : 0.2} 
+        />
+        <Bloom
+          intensity={isDark ? 0.9 : 0.8}
+          luminanceThreshold={isDark ? 0.9 : 1.1}
+          luminanceSmoothing={0.1}
+          blendFunction={THREE.AdditiveBlending}
+        />
       </EffectComposer>
 
       {/* Navigation Controller */}
@@ -87,8 +81,44 @@ Itay's Island" />
       )}
 
       <SceneResizer/>
+    </>
+  );
+}
+
+export default function Scene() {
+  const { isLoading} = useCustomLoadingManager();
+  const isFirstLoaded = useRef(false);
+
+  useEffect(() => {
+    if(!isLoading && !isFirstLoaded.current) isFirstLoaded.current = true;
+  }, [isLoading]);
+
+  
+  useStatsOverlay();
 
 
-    </Canvas>
+  return (
+    <>
+      {/* External Loading Screen */}
+      <LoadingScreen loading={isLoading && !isFirstLoaded.current} />
+      
+      {/* Main Canvas */}
+      <Canvas
+        shadows
+        style={{ background: "black" }}
+        gl={{
+          toneMapping: THREE.ReinhardToneMapping,
+          outputColorSpace: THREE.SRGBColorSpace,
+          antialias: true
+        }}
+      >
+        {/* Loading progress tracker */}
+        
+        {/* Scene content wrapped in Suspense */}
+        <Suspense fallback={null}>
+          <SceneContent />
+        </Suspense>
+      </Canvas>
+    </>
   );
 }

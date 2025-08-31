@@ -1,6 +1,7 @@
 import * as THREE from "three"
 import { useEffect, useMemo, useRef, useState } from "react"
 import { useFrame, useThree } from "@react-three/fiber"
+import { useTexture } from "@react-three/drei"
 
 type CloudTextProps = {
   text: string
@@ -26,10 +27,7 @@ export function CloudText({
   const [stringBox, setStringBox] = useState({ wScene: 0, hScene: 0 })
 
   // Smoke texture for particles
-  const texture = useMemo(
-    () => new THREE.TextureLoader().load("https://ksenia-k.com/img/threejs/smoke.png"),
-    []
-  )
+  const texture = useTexture("textures/cloud/smoke.png")
 
   // Draw text on canvas and sample coordinates
   useEffect(() => {

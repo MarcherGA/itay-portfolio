@@ -1,12 +1,12 @@
-import { useLoader } from '@react-three/fiber';
 import { JSX, useEffect, useRef, useState } from 'react';
-import { Group, TextureLoader, Euler } from 'three';
+import { Group, Euler } from 'three';
 import { useSpring } from '@react-spring/three';
 import content from '../../data/content.json';
 import * as THREE from 'three';
 import ProjectDisplay from './project-display';
 import { CarouselArrow } from './carousel-arrow';
 import { CarouselDot } from './carousel-dot';
+import { useTexture } from '@react-three/drei';
 
 type CarouselProps = {
   rotation?: [number, number, number];
@@ -40,7 +40,7 @@ export default function ProjectsCarousel({
 
   const projects = content.ProjectCards as Project[];
   const imageProjects = projects.filter((p) => p.type === 'image');
-  const textures = useLoader(TextureLoader, imageProjects.map((p) => p.image!));
+  const textures = useTexture(imageProjects.map((p) => p.image!));
 
   const textureMap = new Map();
   imageProjects.forEach((project, i) => {
@@ -52,10 +52,10 @@ export default function ProjectsCarousel({
     controlsOpacity: isFocused ? 1 : 0,
     config: { tension: 120, friction: 14, duration: 1200 },
     onStart: () => {
-      if (isFocused) conrolsGroupRef.current.visible = true;
+      if (isFocused && conrolsGroupRef.current) conrolsGroupRef.current.visible = true;
     },
     onResolve: () => {
-      if (!isFocused) conrolsGroupRef.current.visible = false;
+      if (!isFocused && conrolsGroupRef.current) conrolsGroupRef.current.visible = false;
     },
   });
 

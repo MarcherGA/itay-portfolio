@@ -7,8 +7,6 @@ export function ScrollHintOverlay() {
   const { mode } = useThemeStore();
   const isDark = mode === 'dark';
 
-  console.log('ScrollHintOverlay render - showHint:', showHint);
-
   // Don't render anything if hint is not showing
   if (!showHint) return null;
 
