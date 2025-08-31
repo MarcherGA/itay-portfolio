@@ -218,8 +218,7 @@ export function MagicSparksText({
   return (
     <instancedMesh
     frustumCulled={true}
-
-      scale={width > 768 ? 0.6 : 0.4}
+      scale={width > 1600 ? 0.5 : 0.4}
       position={position}
       ref={meshRef}
       args={[geometry, material, particles.length]}
