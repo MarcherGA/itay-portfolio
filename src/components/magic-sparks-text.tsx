@@ -1,6 +1,7 @@
 import * as THREE from "three"
 import { useEffect, useMemo, useRef, useState } from "react"
 import { useFrame, useThree } from "@react-three/fiber"
+import { useScreenSize } from "../hooks/useScreenSize"
 
 type MagicSparksTextProps = {
   text: string
@@ -28,6 +29,7 @@ export function MagicSparksText({
   const dummy = useMemo(() => new THREE.Object3D(), [])
   const [particles, setParticles] = useState<any[]>([])
   const [stringBox, setStringBox] = useState({ wScene: 0, hScene: 0 })
+  const [width] = useScreenSize();
   
   // Performance monitoring and optimization
   const frameTimeRef = useRef<number[]>([])
@@ -217,7 +219,7 @@ export function MagicSparksText({
     <instancedMesh
     frustumCulled={true}
 
-      scale={0.7}
+      scale={width > 768 ? 0.6 : 0.4}
       position={position}
       ref={meshRef}
       args={[geometry, material, particles.length]}

@@ -17,14 +17,14 @@ type FloatingIslandProps = {
   onLoad?: (nodes: Record<string, THREE.Object3D>) => void;
 } & JSX.IntrinsicElements["group"];
 
-const CRYSTAL_CAMERA_POSITION_OFFSET = new THREE.Vector3(1.6, 1.5, 1.5);
+const CRYSTAL_CAMERA_POSITION_OFFSET = new THREE.Vector3(2.1, 1.5, 2);
 const CRYSTAL_LOOK_AT_OFFSET = new THREE.Vector3(0.3, 1.4, 0);
 
 const SIGN_CAMERA_POSITION_OFFSET = new THREE.Vector3(-0.55, 0.61, 1.5);
 const SIGN_LOOK_AT_OFFSET = new THREE.Vector3(0, 0.15, 0);
 
-const AVATAR_CAMERA_POSITION_OFFSET = new THREE.Vector3(0, 2.32, 2.8);
-const AVATAR_LOOK_AT_OFFSET = new THREE.Vector3(-0.65, 2.17, 1.6);
+const AVATAR_CAMERA_POSITION_OFFSET = new THREE.Vector3(0, 2.32, 4);
+const AVATAR_LOOK_AT_OFFSET = new THREE.Vector3(-1.1, 2.17, 1.6);
 
 const HOME_CAMERA_POS = new THREE.Vector3(0, 3.5, 10);
 const HOME_LOOK_AT = new THREE.Vector3(0, 0.5, 0);

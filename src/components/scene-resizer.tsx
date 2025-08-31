@@ -9,7 +9,7 @@ export function SceneResizer() {
 
   const baseFov = 60;
   const baseWidth = 1080;
-  const minFov = 50;
+  const minFov = 45;
   const maxFov = 80;
 
   const fov = useMemo(() => {
