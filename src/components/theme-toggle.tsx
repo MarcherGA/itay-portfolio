@@ -2,13 +2,23 @@ import React from 'react';
 import { useThemeStore } from '../hooks/useThemeStore';
 
 export function ThemeToggle() {
-  const { mode, toggleMode } = useThemeStore();
+  const { mode, isSystemTheme, toggleMode, setSystemTheme } = useThemeStore();
   const isDark = mode === 'dark';
+
+  const handleClick = (e: React.MouseEvent) => {
+    if (e.shiftKey && !isSystemTheme) {
+      // Shift+click to reset to system theme
+      setSystemTheme(true);
+    } else {
+      // Normal click to toggle theme
+      toggleMode();
+    }
+  };
 
   return (
     <div className="fixed bottom-6 left-6 z-50">
       <button
-        onClick={toggleMode}
+        onClick={handleClick}
         className={`
           relative w-16 h-8 rounded-full transition-all duration-300 ease-in-out
           ${isDark 
@@ -19,7 +29,11 @@ export function ThemeToggle() {
           hover:shadow-xl transform hover:scale-105
           cursor-interactive
         `}
-        title={isDark ? 'Switch to bright mode' : 'Switch to dark mode'}
+        title={
+          isSystemTheme 
+            ? `Using system theme (${mode}). Click to override.`
+            : `Manual ${mode} mode. Click to toggle, Shift+click to use system theme.`
+        }
       >
         {/* Toggle Handle */}
         <div
@@ -63,6 +77,7 @@ export function ThemeToggle() {
             </svg>
           </div>
         </div>
+
       </button>
     </div>
   );

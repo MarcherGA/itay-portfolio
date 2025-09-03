@@ -57,7 +57,7 @@ export function LoadingScreen({ loading, progress }: LoadingScreenProps) {
   const backgroundStyle = isDark 
     ? { background: 'black' }
     : {
-        background: 'linear-gradient(135deg, #87CEEB 0%, #98D8E8 25%, #B0E0E6 50%, #87CEEB 75%, #4A90E2 100%)',
+        background: 'linear-gradient(#0747ab, #a7b9c7)',
         backgroundSize: '400% 400%',
         animation: 'gradientShift 8s ease infinite'
       };
