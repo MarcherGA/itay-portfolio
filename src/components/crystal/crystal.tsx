@@ -22,30 +22,32 @@ export function InteractableCrystal({ mesh, isFocused, onClick, ...props }: Inte
     const isToon = mesh.material instanceof MeshToonMaterial;
     if (!isToon) {
       const mat = new MeshToonMaterial().copy(mesh.material as MeshStandardMaterial);
-      mat.emissiveIntensity = 1.2;
+      mat.emissiveIntensity = 1.1;
       mat.emissive.set("#00aaff");
       mesh.material = mat;
       clonedMaterialRef.current = mat;
     } else {
       clonedMaterialRef.current = mesh.material as MeshToonMaterial;
+      clonedMaterialRef.current.emissiveIntensity = 1.1;
+      clonedMaterialRef.current.emissive.set("#00aaff");
     }
   }, [mesh]);
 
   const handleClick = useCallback(() => {
-    onClick?.();
     handlePointerLeave();
+    onClick?.();
   }, [onClick]);
 
   const handlePointerEnter = useCallback(() => {
     if (!isFocused) {
-      emissiveIntensity.start(2.2);
+      emissiveIntensity.start(2.1);
       color.start("#00ffff"); // Cyan
     }
   }, [isFocused, emissiveIntensity, color]);
 
   const handlePointerLeave = useCallback(() => {
     if (!isFocused) {
-      emissiveIntensity.start(1.2);
+      emissiveIntensity.start(1.1);
       color.start("#00aaff"); // Original
     }
   }, [isFocused, emissiveIntensity, color]);
