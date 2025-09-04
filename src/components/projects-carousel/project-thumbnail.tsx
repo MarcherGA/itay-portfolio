@@ -32,7 +32,7 @@ export function ProjectThumbnail({ focused = false, link, texture, opacity }: Pr
       <AnimatedMeshBasicMaterial
         map={texture}
         transparent
-        opacity={typeof opacity === "number" ? opacity : opacity?.to((o) => o)}
+        opacity={opacity}
       />
     </mesh>
   );

@@ -137,11 +137,10 @@ export default function ProjectsCarousel({
 
           const showFade =
             (fadeState === 'fadingOut' && isCurrent) ||
-            (fadeState === 'fadingIn' && isTarget) ||
-            (fadeState === 'idle' && isCurrent);
+            (fadeState === 'fadingIn' && isTarget) 
 
           const projectVisible = displayVisible && (isFocused ? visible : i === currentIndex);
-          const opacity = isFocused ? (showFade ? fade : 1) : displayOpacity;
+          const opacity = isFocused ? (showFade ? fade : displayOpacity) : displayOpacity;
 
           return (
             <group key={i} visible={projectVisible}>
