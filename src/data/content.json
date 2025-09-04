@@ -17,10 +17,10 @@
         },
         {
             "type": "image",
-            "name": "Kingdom Of Knowledge",
-            "description": "Description of project 1.",
-            "link": "https://github.com/MarcherGA/Elapid",
-            "image":"./thumbnails/elapid.png"
+            "name": "My Portfolio",
+            "description": "This project, built using React, Three.js, and varying AI tools, including Hunyuan3D-2 for 3D assets generation, and Dall-E for textures generation.",
+            "link": "https://github.com/MarcherGA/itay-bio",
+            "image":"./thumbnails/portfolio.png"
         },
         {
             "type": "image",

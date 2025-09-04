@@ -1,14 +1,22 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useScrollHint } from '../hooks/useScrollHint';
 import { useThemeStore } from '../hooks/useThemeStore';
+import { useCustomLoadingManager } from '../hooks/useCustomLoadingManager';
 
 export function ScrollHintOverlay() {
+  const { isLoading} = useCustomLoadingManager();
+  const isFirstLoaded = useRef(false);
   const { showHint } = useScrollHint();
   const { mode } = useThemeStore();
   const isDark = mode === 'dark';
 
+  
+  useEffect(() => {
+    if(!isLoading && !isFirstLoaded.current) isFirstLoaded.current = true;
+  }, [isLoading]);
+
   // Don't render anything if hint is not showing
-  if (!showHint) return null;
+  if (!showHint || !isFirstLoaded.current) return null;
 
   return (
     <div 

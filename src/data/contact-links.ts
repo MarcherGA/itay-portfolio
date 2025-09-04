@@ -1,4 +1,3 @@
-
 export const contactLinks = [
     {
       href: "mailto:Itayuriel1@gmail.com",
@@ -16,7 +15,7 @@ export const contactLinks = [
       position: [0, 1, 0.8],
     },
     {
-      href: "../assets/Itay-Levy-CV.pdf",
+      href: "./Itay-Levy-CV.pdf",
       icon: "/icons/cv.svg",
       position: [1, 1, -0.5],
     }
