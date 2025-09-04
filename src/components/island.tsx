@@ -26,8 +26,8 @@ const SIGN_LOOK_AT_OFFSET = new THREE.Vector3(0, 0.15, 0);
 const AVATAR_CAMERA_POSITION_OFFSET = new THREE.Vector3(0, 2.32, 4);
 const AVATAR_LOOK_AT_OFFSET = new THREE.Vector3(-1.1, 2.17, 1.6);
 
-const HOME_CAMERA_POS = new THREE.Vector3(0, 3.5, 10);
-const HOME_LOOK_AT = new THREE.Vector3(0, 0.5, 0);
+const ISLAND_CAMERA_POS = new THREE.Vector3(0, 3.5, 10);
+const ISLAND_LOOK_AT = new THREE.Vector3(0.2, 0.5, 0);
 
 export function FloatingIsland({ onLoad, ...groupProps }: FloatingIslandProps) {
   const { scene, nodes } = useGLTF("models/floating_island.glb") as unknown as {
@@ -59,10 +59,10 @@ useEffect(() => {
   const focusTargets: FocusTargetData[] = useMemo(
     () => [
       {
-        id: "up",
+        id: "island",
         mesh: null,
-        cameraOffset: HOME_CAMERA_POS,
-        lookAtOffset: HOME_LOOK_AT,
+        cameraOffset: ISLAND_CAMERA_POS,
+        lookAtOffset: ISLAND_LOOK_AT,
       },
       {
         id: "avatar",

@@ -5,16 +5,20 @@ import * as THREE from "three";
 // Split shader parts
 import vertexMain from "@/shaders/cloud.vert?raw";
 import fragmentMain from "@/shaders/cloud.frag?raw";
+import vertexMobile from "@/shaders/cloud-mobile.vert?raw";
+import fragmentMobile from "@/shaders/cloud-mobile.frag?raw";
 import snoise from "@/shaders/glsl-noise.glsl?raw";
 import fbm3d from "@/shaders/glsl-fractal-brown-noise.glsl?raw";
 import levels from "@/shaders/levels.glsl?raw";
 import { useTexture } from "@react-three/drei";
 import { sharedCloudPlane } from "../../three/shared";
 
+// Detect mobile device
+const IS_MOBILE = typeof navigator !== 'undefined' && 
+  /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
 // Reduce count for mobile
-const COUNT = typeof navigator !== 'undefined' && 
-  /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) 
-  ? 12 : 20;
+const COUNT = IS_MOBILE ? 20 : 30;
 
 export function Clouds() {
   const meshRef = useRef<THREE.InstancedMesh>(null);
@@ -36,11 +40,10 @@ export function Clouds() {
       t.anisotropy = 1;
       
       // Reduce texture size for mobile if needed
-      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-      if (isMobile && t.image) {
+      if (IS_MOBILE && t.image) {
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
-        const maxSize = 256; // Reduced from original size
+        const maxSize = 128; // Reduced from original size
         
         const scale = Math.min(maxSize / t.image.width, maxSize / t.image.height);
         canvas.width = t.image.width * scale;
@@ -53,8 +56,13 @@ export function Clouds() {
     });
   }, [shapeTexture, noiseTexture]);
 
-  const vertexShader = `${snoise}\n${vertexMain}`;
-  const fragmentShader = `${snoise}\n${fbm3d}\n${levels}\n${fragmentMain}`;
+  // Use simplified shaders for mobile devices
+  const vertexShader = IS_MOBILE 
+    ? vertexMobile 
+    : `${snoise}\n${vertexMain}`;
+  const fragmentShader = IS_MOBILE 
+    ? fragmentMobile 
+    : `${snoise}\n${fbm3d}\n${levels}\n${fragmentMain}`;
 
   const seedArray = useMemo(() => {
     const data = new Float32Array(COUNT * 4);
@@ -79,18 +87,35 @@ export function Clouds() {
   const matrices = useMemo(() => {
     const dummy = new THREE.Object3D();
     const transforms = [];
-    const minPhi = 0.9;    
+    const minPhi = 0.5;    
     const maxPhi = Math.PI - minPhi;
-  
+    
+    // Use golden angle spiral for more even distribution
+    const goldenAngle = Math.PI * (3 - Math.sqrt(5)); // Golden angle in radians
+    
     for (let i = 0; i < COUNT; i++) {
-      const theta = Math.random() * Math.PI * 2;
-      const phi = minPhi + Math.random() * (maxPhi - minPhi);
+      // Even distribution using golden angle spiral
+      const theta = i * goldenAngle;
+      
+      // More even phi distribution using linear spacing with some randomization
+      const phiProgress = i / (COUNT - 1);
+      const phiRange = maxPhi - minPhi;
+      const basePhi = minPhi + phiProgress * phiRange;
+      
+      // Add small random offset (much smaller than before) for natural look
+      const phiOffset = (Math.random() - 0.5) * 0.2;
+      const phi = Math.max(minPhi, Math.min(maxPhi, basePhi + phiOffset));
+      
       const r = 70;
   
       const x = r * Math.sin(phi) * Math.cos(theta);
       const y = r * Math.cos(phi) * 0.5; 
       const z = r * Math.sin(phi) * Math.sin(theta);
-      const scale = 50 + Math.random() * 40;
+      
+      // More consistent scaling with less randomness
+      const baseScale = 50;
+      const scaleVariation = 20; // Reduced from 40
+      const scale = baseScale + (Math.random() - 0.5) * scaleVariation;
   
       dummy.position.set(x, y, z);
       dummy.scale.set(scale, scale, 1);
@@ -132,9 +157,7 @@ export function Clouds() {
 
   // Throttled frame updates for mobile
   const frameSkip = useRef(0);
-  const maxFrameSkip = typeof navigator !== 'undefined' && 
-    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) 
-    ? 2 : 0;
+  const maxFrameSkip = IS_MOBILE ? 2 : 0;
 
   useFrame((state) => {
     // Skip frames on mobile for better performance
