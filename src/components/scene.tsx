@@ -12,7 +12,7 @@ import { PerspectiveCamera} from "@react-three/drei";
 import { NavigationController } from "./navigation-controller";
 import { useThemeStore } from "../hooks/useThemeStore";
 import { LoadingScreen } from "./loading-screen";
-import { Suspense, useEffect, useRef} from "react";
+import { Suspense, useEffect, useRef, useState} from "react";
 import { useCustomLoadingManager } from "../hooks/useCustomLoadingManager";
 
 
@@ -87,33 +87,62 @@ Itay's Island" />
 
 export default function Scene() {
   const { isLoading} = useCustomLoadingManager();
-  const isFirstLoaded = useRef(false);
-
+  
+  // Enhanced first-load detection using sessionStorage
+  const hasLoadedThisSession = typeof window !== 'undefined' && 
+    sessionStorage.getItem('sceneLoaded') === 'true';
+  const isFirstLoaded = useRef(hasLoadedThisSession);
+  
+  // Track when the canvas/scene is actually ready to render
+  const [sceneReady, setSceneReady] = useState(false);
+  
   useEffect(() => {
-    if(!isLoading && !isFirstLoaded.current) isFirstLoaded.current = true;
+    // When loading completes for the first time, mark as loaded in session
+    if(!isLoading && !isFirstLoaded.current) {
+      isFirstLoaded.current = true;
+      if (typeof window !== 'undefined') {
+        sessionStorage.setItem('sceneLoaded', 'true');
+      }
+    }
   }, [isLoading]);
 
-  
+  // Cleanup on component unmount (not on dependency changes)
+  useEffect(() => {
+    return () => {
+      if (typeof window !== 'undefined') {
+        sessionStorage.removeItem('sceneLoaded');
+      }
+    };
+  }, []); // Empty dependency array for unmount-only cleanup
+
+  // Handle canvas creation - scene is ready when canvas is created
+  const handleCanvasCreated = () => {
+    setSceneReady(true);
+  };
+
   useStatsOverlay();
 
+  // Show loading screen when:
+  // 1. Assets are still loading OR scene isn't ready to render
+  // 2. AND it's the first time loading (not subsequent visits in same session)
+  const shouldShowLoading = (isLoading || !sceneReady) //&& !isFirstLoaded.current;
 
   return (
     <>
       {/* External Loading Screen */}
-      <LoadingScreen loading={isLoading && !isFirstLoaded.current} />
+      <LoadingScreen loading={shouldShowLoading} />
       
       {/* Main Canvas */}
       <Canvas
         shadows
         style={{ background: "black" }}
+        onCreated={handleCanvasCreated}
         gl={{
           toneMapping: THREE.ReinhardToneMapping,
           outputColorSpace: THREE.SRGBColorSpace,
           antialias: true
         }}
       >
-        {/* Loading progress tracker */}
-        
         {/* Scene content wrapped in Suspense */}
         <Suspense fallback={null}>
           <SceneContent />

@@ -70,11 +70,11 @@ export function useCustomLoadingManager() {
   useEffect(() => {
     const fallbackTimer = setTimeout(() => {
       if (isLoading) {
-        console.log('Fallback: Loading screen timeout after 8 seconds');
+        console.log('Fallback: Loading screen timeout after 30 seconds');
         setProgress(100);
         setIsLoading(false);
       }
-    }, 8000);
+    }, 30000);
 
     return () => clearTimeout(fallbackTimer);
   }, [isLoading]);
