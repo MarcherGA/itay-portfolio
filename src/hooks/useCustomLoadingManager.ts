@@ -7,6 +7,9 @@ export function useCustomLoadingManager() {
   const [progress, setProgress] = useState(0);
   const managerSetupRef = useRef(false);
   const loadingStateRef = useRef({ itemsLoaded: 0, itemsTotal: 0 });
+  const hasInitiallyLoadedRef = useRef(false);
+  const debounceTimerRef = useRef<number | null>(null);
+  const hideTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
     // Prevent double setup in StrictMode
@@ -20,10 +23,20 @@ export function useCustomLoadingManager() {
 
     // Use requestAnimationFrame to defer state updates
     THREE.DefaultLoadingManager.onStart = (url, itemsLoaded, itemsTotal) => {
-      requestAnimationFrame(() => {
-        setIsLoading(true);
-        loadingStateRef.current = { itemsLoaded, itemsTotal };
-      });
+      // Clear any pending hide timer to prevent flickering
+      if (hideTimerRef.current) {
+        clearTimeout(hideTimerRef.current);
+        hideTimerRef.current = null;
+      }
+
+      // Only show loading screen if this is the initial load
+      // or if we're loading a significant number of items
+      if (!hasInitiallyLoadedRef.current || itemsTotal > 5) {
+        requestAnimationFrame(() => {
+          setIsLoading(true);
+          loadingStateRef.current = { itemsLoaded, itemsTotal };
+        });
+      }
     };
     
     THREE.DefaultLoadingManager.onProgress = (url, itemsLoaded, itemsTotal) => {
@@ -35,19 +48,32 @@ export function useCustomLoadingManager() {
     };
     
     THREE.DefaultLoadingManager.onLoad = () => {
-      requestAnimationFrame(() => {
-        setProgress(100);
-        // Add a delay to let everything settle
-        setTimeout(() => {
-          setIsLoading(false);
-        }, 500);
-      });
+      // Clear any existing debounce timer
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+
+      // Debounce the loading completion to prevent rapid show/hide cycles
+      debounceTimerRef.current = setTimeout(() => {
+        requestAnimationFrame(() => {
+          setProgress(100);
+          
+          // Mark as initially loaded
+          hasInitiallyLoadedRef.current = true;
+          
+          // Hide loading screen with a delay for smooth transition
+          hideTimerRef.current = setTimeout(() => {
+            setIsLoading(false);
+          }, 500);
+        });
+      }, 100); // Small debounce to handle rapid load events
     };
     
     THREE.DefaultLoadingManager.onError = (url) => {
       console.error('Loading error:', url);
       requestAnimationFrame(() => {
-        // Still hide loading screen on error
+        // Still hide loading screen on error, but mark as loaded
+        hasInitiallyLoadedRef.current = true;
         setTimeout(() => {
           setIsLoading(false);
         }, 1000);
@@ -62,6 +88,14 @@ export function useCustomLoadingManager() {
         THREE.DefaultLoadingManager.onLoad = originalOnLoad;
         THREE.DefaultLoadingManager.onError = originalOnError;
         managerSetupRef.current = false;
+        
+        // Clear any pending timers
+        if (debounceTimerRef.current) {
+          clearTimeout(debounceTimerRef.current);
+        }
+        if (hideTimerRef.current) {
+          clearTimeout(hideTimerRef.current);
+        }
       }
     };
   }, []);
@@ -72,6 +106,7 @@ export function useCustomLoadingManager() {
       if (isLoading) {
         console.log('Fallback: Loading screen timeout after 30 seconds');
         setProgress(100);
+        hasInitiallyLoadedRef.current = true;
         setIsLoading(false);
       }
     }, 30000);

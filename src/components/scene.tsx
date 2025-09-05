@@ -88,44 +88,23 @@ Itay's Island" />
 export default function Scene() {
   const { isLoading} = useCustomLoadingManager();
   
-  // Enhanced first-load detection using sessionStorage
-  const hasLoadedThisSession = typeof window !== 'undefined' && 
-    sessionStorage.getItem('sceneLoaded') === 'true';
-  const isFirstLoaded = useRef(hasLoadedThisSession);
-  
   // Track when the canvas/scene is actually ready to render
   const [sceneReady, setSceneReady] = useState(false);
+  const sceneReadyRef = useRef(false);
   
-  useEffect(() => {
-    // When loading completes for the first time, mark as loaded in session
-    if(!isLoading && !isFirstLoaded.current) {
-      isFirstLoaded.current = true;
-      if (typeof window !== 'undefined') {
-        sessionStorage.setItem('sceneLoaded', 'true');
-      }
-    }
-  }, [isLoading]);
-
-  // Cleanup on component unmount (not on dependency changes)
-  useEffect(() => {
-    return () => {
-      if (typeof window !== 'undefined') {
-        sessionStorage.removeItem('sceneLoaded');
-      }
-    };
-  }, []); // Empty dependency array for unmount-only cleanup
-
   // Handle canvas creation - scene is ready when canvas is created
   const handleCanvasCreated = () => {
-    setSceneReady(true);
+    if (!sceneReadyRef.current) {
+      sceneReadyRef.current = true;
+      setSceneReady(true);
+    }
   };
 
   useStatsOverlay();
 
-  // Show loading screen when:
-  // 1. Assets are still loading OR scene isn't ready to render
-  // 2. AND it's the first time loading (not subsequent visits in same session)
-  const shouldShowLoading = (isLoading || !sceneReady) //&& !isFirstLoaded.current;
+  // Simplified loading logic: show loading screen only when assets are loading
+  // or when the canvas hasn't been created yet (initial render)
+  const shouldShowLoading = isLoading || !sceneReady;
 
   return (
     <>
