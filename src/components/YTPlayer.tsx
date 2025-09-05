@@ -56,7 +56,7 @@ export default function YTPlayer3D({ videoId, visible, opacity }: Props) {
       
     >
       <planeGeometry args={[1.5, 0.9]} />
-      <AnimatedMeshBasicMaterial map={thumbnail} transparent opacity={typeof opacity === 'number' ? opacity : opacity?.to(o => o)}/>
+      <AnimatedMeshBasicMaterial map={thumbnail} transparent opacity={opacity}/>
     </mesh>
   );
 }

@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState, useCallback } from "react";
+import { useRef, useEffect, useCallback } from "react";
 import * as THREE from "three";
 import { useCameraTransition } from "./useCameraTransition";
 import { useFocusStore } from "./useFocusStore";
@@ -10,7 +10,7 @@ export function useFocusScrollManager(
 ) {
   const { createControlledTransition, isTransitioningRef } = useCameraTransition();
 
-  const { currentIndex, setCurrentIndex } = useFocusStore(); // Remove targets from here
+  const { currentIndex } = useFocusStore(); // Remove targets from here
   const cachedPositions = useRef<{ cameraPos: THREE.Vector3; lookAt: THREE.Vector3 }[]>([]);
   const forwardTimelineRef = useRef<gsap.core.Timeline | null>(null);
   const backwardTimelineRef = useRef<gsap.core.Timeline | null>(null);

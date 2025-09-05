@@ -38,7 +38,6 @@ export function MagicSparksText({
   
   // Memory optimization - reuse objects
   const tempVector = useMemo(() => new THREE.Vector3(), [])
-  const tempQuaternion = useMemo(() => new THREE.Quaternion(), [])
 
   // Use existing magic spark texture instead of generating complex one
   const texture = useMemo(() => {

@@ -1,13 +1,13 @@
 import { useRef, useMemo } from 'react';
 import { BackSide, Color, Mesh } from 'three';
-import { useRawData } from '../../hooks/useRawData';
+import colors from '../../data/sky-colors.json';
 
 import vertex from '@/shaders/default.vert';
 import fragment from '@/shaders/environment.frag';
 
 export default function SkyBackground() {
   const mesh = useRef<Mesh>(null);
-  const colorSteps = useRawData('colors.gradients');
+  const colorSteps = colors.gradients;
   const radius = 150;
 
   const uniforms = useMemo(() => ({

@@ -1,7 +1,7 @@
 
 import Scene from './components/scene'
 import { Cursor } from './cursor';
-import { NavigationBar } from './components/navigation-bar';
+import { NavigationBar } from './components/navigation-bar/navigation-bar';
 import { ThemeToggle } from './components/theme-toggle';
 import { ScrollHintOverlay } from './components/scroll-hint-overlay';
 import { navigationItems } from './data/navigation-items';

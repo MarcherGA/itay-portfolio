@@ -1,5 +1,5 @@
-import { useFocusStore } from '../hooks/useFocusStore';
-import { NavigationItem } from '../types/navigationItem';
+import { useFocusStore } from "../../hooks/useFocusStore";
+import { NavigationItem } from "../../types/navigationItem";
 
 interface NavigationBarProps {
   items: NavigationItem[];

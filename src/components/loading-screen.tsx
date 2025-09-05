@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useThemeStore } from '../hooks/useThemeStore';
 
 interface LoadingScreenProps {
@@ -31,7 +31,7 @@ const FUNNY_MESSAGES = [
 
 const randomMessageIndex = Math.floor(Math.random() * FUNNY_MESSAGES.length);
 
-export function LoadingScreen({ loading, progress }: LoadingScreenProps) {
+export function LoadingScreen({ loading }: LoadingScreenProps) {
   const { mode } = useThemeStore();
   const isDark = mode === 'dark';
   const [currentMessageIndex, setCurrentMessageIndex] = useState(randomMessageIndex);

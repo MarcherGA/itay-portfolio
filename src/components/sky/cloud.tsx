@@ -23,7 +23,6 @@ const COUNT = IS_MOBILE ? 20 : 30;
 export function Clouds() {
   const meshRef = useRef<THREE.InstancedMesh>(null);
   const timeUniform = useRef({ value: 0 });
-  const materialRef = useRef<THREE.ShaderMaterial>(null);
 
   const [shapeTexture, noiseTexture] = useTexture([
     "/textures/cloud/1.jpg",

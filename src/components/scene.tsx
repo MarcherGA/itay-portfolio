@@ -4,16 +4,15 @@ import * as THREE from "three";
 import { FloatingIsland } from "../components/island";
 import { SkyEnvironment } from "../components/sky/sky-environment";
 import { StarrySkybox } from "../components/sky/starry-skybox";
-import { SceneResizer } from "./scene-resizer";
-import { useStatsOverlay } from "../hooks/useStatsOverlay";
+import { FovResizer } from "./fov-resizer";
 import { CloudText } from "./cloud-text";
 import { MagicSparksText } from "./magic-sparks-text";
 import { PerspectiveCamera} from "@react-three/drei";
-import { NavigationController } from "./navigation-controller";
 import { useThemeStore } from "../hooks/useThemeStore";
 import { LoadingScreen } from "./loading-screen";
-import { Suspense, useEffect, useRef, useState} from "react";
+import { Suspense, useRef, useState} from "react";
 import { useCustomLoadingManager } from "../hooks/useCustomLoadingManager";
+import { NavigationController } from "./navigation-bar/navigation-controller";
 
 
 // Scene content component
@@ -80,7 +79,7 @@ Itay's Island" />
 Itay's Island" />
       )}
 
-      <SceneResizer/>
+      <FovResizer/>
     </>
   );
 }
@@ -99,9 +98,6 @@ export default function Scene() {
       setSceneReady(true);
     }
   };
-
-  useStatsOverlay();
-
   // Simplified loading logic: show loading screen only when assets are loading
   // or when the canvas hasn't been created yet (initial render)
   const shouldShowLoading = isLoading || !sceneReady;

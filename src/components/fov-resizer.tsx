@@ -3,7 +3,7 @@ import { useScreenSize } from '../hooks/useScreenSize';
 import { useThree } from '@react-three/fiber';
 import { PerspectiveCamera } from 'three';
 
-export function SceneResizer() {
+export function FovResizer() {
   const { camera } = useThree();
   const [width] = useScreenSize();
 

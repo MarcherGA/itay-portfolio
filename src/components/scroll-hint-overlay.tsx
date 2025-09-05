@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { useScrollHint } from '../hooks/useScrollHint';
 import { useThemeStore } from '../hooks/useThemeStore';
 import { useCustomLoadingManager } from '../hooks/useCustomLoadingManager';
