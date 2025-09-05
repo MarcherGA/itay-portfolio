@@ -1,6 +1,6 @@
 # Itay's Interactive 3D Portfolio
 
-An immersive 3D portfolio website built with React, TypeScript, and Three.js, featuring a fantasy-themed floating island, with interactive elements
+Immersive 3D portfolio website built with React, TypeScript, and Three.js, featuring a fantasy-themed floating island, with interactive elements
 
 ## ✨ Features
 
