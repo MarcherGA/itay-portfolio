@@ -2,19 +2,17 @@ import { Canvas } from "@react-three/fiber";
 import { EffectComposer, Bloom, BrightnessContrast} from "@react-three/postprocessing";
 import * as THREE from "three";
 import { FloatingIsland } from "../components/island";
+import { SkyEnvironment } from "../components/sky/sky-environment";
+import { StarrySkybox } from "../components/sky/starry-skybox";
 import { FovResizer } from "./fov-resizer";
+import { CloudText } from "./cloud-text";
+import { MagicSparksText } from "./magic-sparks-text";
 import { PerspectiveCamera} from "@react-three/drei";
 import { useThemeStore } from "../hooks/useThemeStore";
 import { LoadingScreen } from "./loading-screen";
-import { Suspense, useRef, useState, lazy} from "react";
+import { Suspense, useRef, useState} from "react";
 import { useCustomLoadingManager } from "../hooks/useCustomLoadingManager";
 import { NavigationController } from "./navigation-bar/navigation-controller";
-
-// Lazy load theme-specific components
-const SkyEnvironment = lazy(() => import("../components/sky/sky-environment").then(m => ({ default: m.SkyEnvironment })));
-const StarrySkybox = lazy(() => import("../components/sky/starry-skybox").then(m => ({ default: m.StarrySkybox })));
-const CloudText = lazy(() => import("./cloud-text").then(m => ({ default: m.CloudText })));
-const MagicSparksText = lazy(() => import("./magic-sparks-text").then(m => ({ default: m.MagicSparksText })));
 
 
 // Scene content component
