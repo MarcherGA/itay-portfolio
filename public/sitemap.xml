@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+  <url>
+    <loc>https://itay-levy.vercel.app/</loc>
+    <lastmod>2025-10-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>1.0</priority>
+    <image:image>
+      <image:loc>https://itay-levy.vercel.app/icons/floating-island.png</image:loc>
+      <image:title>Itay Levy Portfolio - Floating Island</image:title>
+    </image:image>
+  </url>
+</urlset>
