@@ -1,6 +1,6 @@
 import { useEffect, useRef, useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
-import * as THREE from "three";
+import { InstancedMesh, RepeatWrapping, LinearMipmapLinearFilter, LinearFilter, InstancedBufferAttribute, Object3D, Sphere, Vector3, Vector2, ShaderMaterial, FrontSide } from "three";
 
 // Split shader parts
 import vertexMain from "@/shaders/cloud.vert?raw";
@@ -21,7 +21,7 @@ const IS_MOBILE = typeof navigator !== 'undefined' &&
 const COUNT = IS_MOBILE ? 20 : 30;
 
 export function Clouds() {
-  const meshRef = useRef<THREE.InstancedMesh>(null);
+  const meshRef = useRef<InstancedMesh>(null);
   const timeUniform = useRef({ value: 0 });
 
   const [shapeTexture, noiseTexture] = useTexture([
@@ -32,10 +32,10 @@ export function Clouds() {
   // Optimize textures for mobile
   useEffect(() => {
     [shapeTexture, noiseTexture].forEach((t) => {
-      t.wrapS = t.wrapT = THREE.RepeatWrapping;
+      t.wrapS = t.wrapT = RepeatWrapping;
       t.generateMipmaps = true;
-      t.minFilter = THREE.LinearMipmapLinearFilter;
-      t.magFilter = THREE.LinearFilter;
+      t.minFilter = LinearMipmapLinearFilter;
+      t.magFilter = LinearFilter;
       t.anisotropy = 1;
       
       // Reduce texture size for mobile if needed
@@ -78,15 +78,15 @@ export function Clouds() {
     const geo = sharedCloudPlane;
     geo.setAttribute(
       "instanceSeed",
-      new THREE.InstancedBufferAttribute(seedArray, 4)
+      new InstancedBufferAttribute(seedArray, 4)
     );
     return geo;
   }, [seedArray]);
 
   const matrices = useMemo(() => {
-    const dummy = new THREE.Object3D();
+    const dummy = new Object3D();
     const transforms = [];
-    const minPhi = 0.5;    
+    const minPhi = 0.5;
     const maxPhi = Math.PI - minPhi;
     
     // Use golden angle spiral for more even distribution
@@ -141,16 +141,16 @@ export function Clouds() {
 
     // Compute precise bounding sphere from all instances
     const positions = [];
-    const dummy = new THREE.Object3D();
-    
+    const dummy = new Object3D();
+
     for (let i = 0; i < COUNT; i++) {
       dummy.applyMatrix4(matrices[i]);
       positions.push(dummy.position.clone());
     }
-    
-    const boundingSphere = new THREE.Sphere();
+
+    const boundingSphere = new Sphere();
     boundingSphere.setFromPoints(positions);
-    
+
     meshRef.current.boundingSphere = boundingSphere;
   }, [matrices]);
 
@@ -170,15 +170,15 @@ export function Clouds() {
 
     // Distance-based LOD (optional)
     if (meshRef.current && state.camera) {
-      const distance = state.camera.position.distanceTo(new THREE.Vector3(0, 0, 0));
+      const distance = state.camera.position.distanceTo(new Vector3(0, 0, 0));
       let targetCount = lodSystem.counts[0];
-      
+
       for (let i = 0; i < lodSystem.distances.length; i++) {
         if (distance > lodSystem.distances[i]) {
           targetCount = lodSystem.counts[i + 1];
         }
       }
-      
+
       if (meshRef.current.count !== targetCount) {
         meshRef.current.count = targetCount;
       }
@@ -187,7 +187,7 @@ export function Clouds() {
 
   // Memoized material to prevent recreations
   const material = useMemo(() => {
-    return new THREE.ShaderMaterial({
+    return new ShaderMaterial({
       vertexShader,
       fragmentShader,
       uniforms: {
@@ -197,12 +197,12 @@ export function Clouds() {
         uTimeFactor1: { value: 0.002 },
         uTimeFactor2: { value: 0.1 },
         rotation: { value: 0 },
-        center: { value: new THREE.Vector2(0.5, 0.5) },
+        center: { value: new Vector2(0.5, 0.5) },
       },
       transparent: true,
       alphaTest: 0.05,
       depthWrite: false,
-      side: THREE.FrontSide,
+      side: FrontSide,
       // Additional mobile optimizations
       precision: 'mediump', // Use medium precision on mobile
     });

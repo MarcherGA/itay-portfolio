@@ -1,4 +1,4 @@
-import * as THREE from "three"
+import { InstancedMesh, Object3D, MeshBasicMaterial, PlaneGeometry } from "three"
 import { useEffect, useMemo, useRef, useState } from "react"
 import { useFrame, useThree } from "@react-three/fiber"
 import { useTexture } from "@react-three/drei"
@@ -15,15 +15,15 @@ type CloudTextProps = {
 
 export function CloudText({
   text = "Cloud typer",
-  font = "Verdana", 
+  font = "Verdana",
   color = "#2a9d8f",
   fontSize = 60,
   scale = 0.08,
   position = [0, 0, 0],
 }: CloudTextProps) {
   const { camera } = useThree()
-  const meshRef = useRef<THREE.InstancedMesh>(null)
-  const dummy = useMemo(() => new THREE.Object3D(), [])
+  const meshRef = useRef<InstancedMesh>(null)
+  const dummy = useMemo(() => new Object3D(), [])
   const [particles, setParticles] = useState<any[]>([])
   const [stringBox, setStringBox] = useState({ wScene: 0, hScene: 0 })
   const [width] = useScreenSize();
@@ -132,8 +132,8 @@ export function CloudText({
   })
 
   // Create material like the original
-  const material = useMemo(() => 
-    new THREE.MeshBasicMaterial({
+  const material = useMemo(() =>
+    new MeshBasicMaterial({
       color: 0xffffff,
       alphaMap: texture,
       depthTest: false,
@@ -142,7 +142,7 @@ export function CloudText({
     }), [texture]
   )
 
-  const geometry = useMemo(() => new THREE.PlaneGeometry(1, 1), [])
+  const geometry = useMemo(() => new PlaneGeometry(1, 1), [])
 
   return (
     <instancedMesh

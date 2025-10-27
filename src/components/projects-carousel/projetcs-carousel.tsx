@@ -1,8 +1,7 @@
 import { JSX, useEffect, useRef, useState } from 'react';
-import { Group, Euler } from 'three';
+import { Group, Euler, MathUtils } from 'three';
 import { useSpring } from '@react-spring/three';
 import content from '../../data/content.json';
-import * as THREE from 'three';
 import ProjectDisplay from './project-display';
 import { CarouselArrow } from './carousel-arrow';
 import { CarouselDot } from './carousel-dot';
@@ -32,9 +31,9 @@ export default function ProjectsCarousel({
   const conrolsGroupRef = useRef<Group>(null!);
 
   const euler = new Euler(
-    THREE.MathUtils.degToRad(rotation[0]),
-    THREE.MathUtils.degToRad(rotation[1]),
-    THREE.MathUtils.degToRad(rotation[2]),
+    MathUtils.degToRad(rotation[0]),
+    MathUtils.degToRad(rotation[1]),
+    MathUtils.degToRad(rotation[2]),
     'YXZ'
   );
 

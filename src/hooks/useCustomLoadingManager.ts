@@ -1,6 +1,6 @@
 // hooks/useCustomLoadingManager.ts
 import { useState, useEffect, useRef } from 'react';
-import * as THREE from 'three';
+import { DefaultLoadingManager } from 'three';
 
 export function useCustomLoadingManager() {
   const [isLoading, setIsLoading] = useState(true);
@@ -16,13 +16,13 @@ export function useCustomLoadingManager() {
     if (managerSetupRef.current) return;
     managerSetupRef.current = true;
 
-    const originalOnStart = THREE.DefaultLoadingManager.onStart;
-    const originalOnProgress = THREE.DefaultLoadingManager.onProgress;
-    const originalOnLoad = THREE.DefaultLoadingManager.onLoad;
-    const originalOnError = THREE.DefaultLoadingManager.onError;
+    const originalOnStart = DefaultLoadingManager.onStart;
+    const originalOnProgress = DefaultLoadingManager.onProgress;
+    const originalOnLoad = DefaultLoadingManager.onLoad;
+    const originalOnError = DefaultLoadingManager.onError;
 
     // Use requestAnimationFrame to defer state updates
-    THREE.DefaultLoadingManager.onStart = (url, itemsLoaded, itemsTotal) => {
+    DefaultLoadingManager.onStart = (url, itemsLoaded, itemsTotal) => {
       // Clear any pending hide timer to prevent flickering
       if (hideTimerRef.current) {
         clearTimeout(hideTimerRef.current);
@@ -39,7 +39,7 @@ export function useCustomLoadingManager() {
       }
     };
     
-    THREE.DefaultLoadingManager.onProgress = (url, itemsLoaded, itemsTotal) => {
+    DefaultLoadingManager.onProgress = (url, itemsLoaded, itemsTotal) => {
       requestAnimationFrame(() => {
         loadingStateRef.current = { itemsLoaded, itemsTotal };
         const progressPercent = itemsTotal > 0 ? (itemsLoaded / itemsTotal) * 100 : 0;
@@ -47,7 +47,7 @@ export function useCustomLoadingManager() {
       });
     };
     
-    THREE.DefaultLoadingManager.onLoad = () => {
+    DefaultLoadingManager.onLoad = () => {
       // Clear any existing debounce timer
       if (debounceTimerRef.current) {
         clearTimeout(debounceTimerRef.current);
@@ -69,7 +69,7 @@ export function useCustomLoadingManager() {
       }, 100); // Small debounce to handle rapid load events
     };
     
-    THREE.DefaultLoadingManager.onError = (url) => {
+    DefaultLoadingManager.onError = (url) => {
       console.error('Loading error:', url);
       requestAnimationFrame(() => {
         // Still hide loading screen on error, but mark as loaded
@@ -83,10 +83,10 @@ export function useCustomLoadingManager() {
     // Cleanup function
     return () => {
       if (managerSetupRef.current) {
-        THREE.DefaultLoadingManager.onStart = originalOnStart;
-        THREE.DefaultLoadingManager.onProgress = originalOnProgress;
-        THREE.DefaultLoadingManager.onLoad = originalOnLoad;
-        THREE.DefaultLoadingManager.onError = originalOnError;
+        DefaultLoadingManager.onStart = originalOnStart;
+        DefaultLoadingManager.onProgress = originalOnProgress;
+        DefaultLoadingManager.onLoad = originalOnLoad;
+        DefaultLoadingManager.onError = originalOnError;
         managerSetupRef.current = false;
         
         // Clear any pending timers

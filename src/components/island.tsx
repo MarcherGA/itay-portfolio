@@ -1,7 +1,6 @@
 import { useGLTF } from "@react-three/drei";
 import { JSX, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import * as THREE from "three";
-import { MeshStandardMaterial, MeshToonMaterial } from "three";
+import { MeshStandardMaterial, MeshToonMaterial, Object3D, Group, Mesh, Vector3 } from "three";
 import { InteractableCrystal } from "./crystal/crystal";
 import { Sign } from "./sign/sign";
 import Avatar from "./avatar/avatar";
@@ -14,32 +13,32 @@ import { invalidate } from "@react-three/fiber";
 
 
 type FloatingIslandProps = {
-  onLoad?: (nodes: Record<string, THREE.Object3D>) => void;
+  onLoad?: (nodes: Record<string, Object3D>) => void;
 } & JSX.IntrinsicElements["group"];
 
-const CRYSTAL_CAMERA_POSITION_OFFSET = new THREE.Vector3(2.1, 1.5, 2);
-const CRYSTAL_LOOK_AT_OFFSET = new THREE.Vector3(0.3, 1.4, 0);
+const CRYSTAL_CAMERA_POSITION_OFFSET = new Vector3(2.1, 1.5, 2);
+const CRYSTAL_LOOK_AT_OFFSET = new Vector3(0.3, 1.4, 0);
 
-const SIGN_CAMERA_POSITION_OFFSET = new THREE.Vector3(-0.55, 0.61, 1.5);
-const SIGN_LOOK_AT_OFFSET = new THREE.Vector3(0, 0.15, 0);
+const SIGN_CAMERA_POSITION_OFFSET = new Vector3(-0.55, 0.61, 1.5);
+const SIGN_LOOK_AT_OFFSET = new Vector3(0, 0.15, 0);
 
-const AVATAR_CAMERA_POSITION_OFFSET = new THREE.Vector3(0, 2.32, 4);
-const AVATAR_LOOK_AT_OFFSET = new THREE.Vector3(-1.1, 2.17, 1.6);
+const AVATAR_CAMERA_POSITION_OFFSET = new Vector3(0, 2.32, 4);
+const AVATAR_LOOK_AT_OFFSET = new Vector3(-1.1, 2.17, 1.6);
 
-const ISLAND_CAMERA_POS = new THREE.Vector3(0, 3.5, 10);
-const ISLAND_LOOK_AT = new THREE.Vector3(0.2, 0.5, 0);
+const ISLAND_CAMERA_POS = new Vector3(0, 3.5, 10);
+const ISLAND_LOOK_AT = new Vector3(0.2, 0.5, 0);
 
 export function FloatingIsland({ onLoad, ...groupProps }: FloatingIslandProps) {
   const { scene, nodes } = useGLTF("models/floating_island.glb") as unknown as {
-    scene: THREE.Group;
-    nodes: Record<string, THREE.Mesh>;
+    scene: Group;
+    nodes: Record<string, Mesh>;
   };
   //const [focus, setFocus] = useState<FocusTarget>(FocusTarget.home);
   const {currentIndex, setCurrentIndex, setTargets} = useFocusStore();
-  
 
-  const avatarRef = useRef<{ group: THREE.Group | null }>(null);
-  const [avatarMesh, setAvatarMesh] = useState<THREE.Group | null>(null);
+
+  const avatarRef = useRef<{ group: Group | null }>(null);
+  const [avatarMesh, setAvatarMesh] = useState<Group | null>(null);
 
   const { island, crystal, sign } = useMemo(() => {
     return {
@@ -116,8 +115,8 @@ useEffect(() => {
   
 
   const { getTargetPosition } = useFocusScrollManager({
-    cameraPos: new THREE.Vector3(0, 50, 14),
-    lookAt: new THREE.Vector3(0, 50, 0),
+    cameraPos: new Vector3(0, 50, 14),
+    lookAt: new Vector3(0, 50, 0),
   }, 0.2);
   const { transition } = useCameraTransition();
 
@@ -169,7 +168,7 @@ useEffect(() => {
         parent={island}
         scale={1.3}
         rotation={[0, Math.PI * 0.36, 0]}
-        position={new THREE.Vector3(-1, -0.12, 2.1)}
+        position={new Vector3(-1, -0.12, 2.1)}
       />
       {/* You can add a button or UI somewhere here that calls returnHome */}
     </group>

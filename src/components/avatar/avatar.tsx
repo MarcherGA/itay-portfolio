@@ -1,9 +1,8 @@
 import React, { useRef, useEffect, useMemo, useCallback, useState, forwardRef, useImperativeHandle, JSX } from 'react';
 import { useGLTF, useAnimations } from '@react-three/drei';
-import * as THREE from 'three';
+import { Group, Mesh, MeshStandardMaterial, MeshToonMaterial, Vector3, LoopRepeat, AnimationAction } from 'three';
 import { SkeletonUtils } from 'three-stdlib';
 import SpeechBubble from './speech-bubble';
-import { Vector3 } from 'three';
 import content from "../../data/content.json";
 import { HitboxMesh } from '../hitbox-mesh';
 import { TypingAnimation } from '../../hooks/useTypingAnimation';
@@ -17,16 +16,16 @@ type AvatarProps = {
 } & JSX.IntrinsicElements['group'];
 
 
-const Avatar = forwardRef< { group: THREE.Group | null }, AvatarProps >(({ onClick, isFocused, position, ...props }, ref) => {
+const Avatar = forwardRef< { group: Group | null }, AvatarProps >(({ onClick, isFocused, position, ...props }, ref) => {
   const { scene: glbScene, animations } = useGLTF('/models/avatar.glb');
   const avatar = useMemo(() => {
     const cloned = skeletonClone(glbScene);
     glbScene.traverse((c) => {
-      if ((c as THREE.Mesh).isMesh) {
-        const mesh = c as THREE.Mesh;
+      if ((c as Mesh).isMesh) {
+        const mesh = c as Mesh;
         mesh.raycast = () => null as any;
-        const src = mesh.material as THREE.MeshStandardMaterial;
-        mesh.material = new THREE.MeshToonMaterial({
+        const src = mesh.material as MeshStandardMaterial;
+        mesh.material = new MeshToonMaterial({
           color: src.color,
           map: src.map ?? null,
         });
@@ -38,7 +37,7 @@ const Avatar = forwardRef< { group: THREE.Group | null }, AvatarProps >(({ onCli
   const [hovered, setHovered] = useState(false);
 
 
-  const group = useRef<THREE.Group>(null);
+  const group = useRef<Group>(null);
 
   // Expose the inner group ref to the parent via ref
   useImperativeHandle(ref, () => ({
@@ -51,8 +50,8 @@ const Avatar = forwardRef< { group: THREE.Group | null }, AvatarProps >(({ onCli
 
   const { actions } = useAnimations(animations, group);
 
-  const idleRef = useRef<THREE.AnimationAction | null>(null);
-  const waveRef = useRef<THREE.AnimationAction | null>(null);
+  const idleRef = useRef<AnimationAction | null>(null);
+  const waveRef = useRef<AnimationAction | null>(null);
 
   useEffect(() => {
     if (!actions) return;
@@ -61,7 +60,7 @@ const Avatar = forwardRef< { group: THREE.Group | null }, AvatarProps >(({ onCli
 
     idleRef.current
       ?.reset()
-      .setLoop(THREE.LoopRepeat, Infinity)
+      .setLoop(LoopRepeat, Infinity)
       .fadeIn(0.3)
       .play();
   }, [actions]);

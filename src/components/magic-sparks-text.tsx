@@ -1,4 +1,4 @@
-import * as THREE from "three"
+import { InstancedMesh, Object3D, Vector3, TextureLoader, Color, MeshBasicMaterial, PlaneGeometry } from "three"
 import { useEffect, useMemo, useRef, useState } from "react"
 import { useFrame, useThree } from "@react-three/fiber"
 import { useScreenSize } from "../hooks/useScreenSize"
@@ -16,7 +16,7 @@ type MagicSparksTextProps = {
 
 export function MagicSparksText({
   text = "Magic Sparks",
-  font = "Verdana", 
+  font = "Verdana",
   baseHue = 45, // Gold base hue
   hueRange = 60, // Range of hue variation
   fontSize = 60,
@@ -25,23 +25,23 @@ export function MagicSparksText({
   position = [0, 0, 0],
 }: MagicSparksTextProps) {
   const { camera } = useThree()
-  const meshRef = useRef<THREE.InstancedMesh>(null)
-  const dummy = useMemo(() => new THREE.Object3D(), [])
+  const meshRef = useRef<InstancedMesh>(null)
+  const dummy = useMemo(() => new Object3D(), [])
   const [particles, setParticles] = useState<any[]>([])
   const [stringBox, setStringBox] = useState({ wScene: 0, hScene: 0 })
   const [width] = useScreenSize();
-  
+
   // Performance monitoring and optimization
   const frameTimeRef = useRef<number[]>([])
   const lastFrameTime = useRef(performance.now())
   const [particleDensity, setParticleDensity] = useState(1) // Start with every 2 pixels
-  
+
   // Memory optimization - reuse objects
-  const tempVector = useMemo(() => new THREE.Vector3(), [])
+  const tempVector = useMemo(() => new Vector3(), [])
 
   // Use existing magic spark texture instead of generating complex one
   const texture = useMemo(() => {
-    const loader = new THREE.TextureLoader()
+    const loader = new TextureLoader()
     return loader.load("/textures/magic-spark.png")
   }, [])
 
@@ -200,9 +200,9 @@ export function MagicSparksText({
   // Create material similar to cloud text for better performance
   const material = useMemo(() => {
     // Create a golden color based on baseHue
-    const goldColor = new THREE.Color(`hsl(${baseHue}, 80%, 65%)`)
-    
-    return new THREE.MeshBasicMaterial({
+    const goldColor = new Color(`hsl(${baseHue}, 80%, 65%)`)
+
+    return new MeshBasicMaterial({
       color: goldColor,
       map: texture,
       depthTest: false,
@@ -212,7 +212,7 @@ export function MagicSparksText({
     })
   }, [texture, sparkIntensity, baseHue])
 
-  const geometry = useMemo(() => new THREE.PlaneGeometry(1, 1), [])
+  const geometry = useMemo(() => new PlaneGeometry(1, 1), [])
 
   return (
     <instancedMesh

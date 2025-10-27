@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import * as THREE from 'three';
+import { Vector3 } from 'three';
 import { useCameraTransition } from '../../hooks/useCameraTransition';
 import { useFocusScrollManager } from '../../hooks/useFocusScrollManager';
 import { useFocusStore } from '../../hooks/useFocusStore';
@@ -8,8 +8,8 @@ import { FocusTarget } from '../../types/focusTarget';
 export function NavigationController() {
   const { setCurrentIndex } = useFocusStore();
   const { getTargetPosition } = useFocusScrollManager({
-    cameraPos: new THREE.Vector3(0, 50, 14),
-    lookAt: new THREE.Vector3(0, 50, 0),
+    cameraPos: new Vector3(0, 50, 14),
+    lookAt: new Vector3(0, 50, 0),
   }, 0.2);
   const { transition } = useCameraTransition();
 

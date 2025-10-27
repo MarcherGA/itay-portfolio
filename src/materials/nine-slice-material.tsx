@@ -1,7 +1,7 @@
 import { shaderMaterial } from '@react-three/drei'
 import { extend } from '@react-three/fiber'
 import { JSX } from 'react'
-import * as THREE from 'three'
+import { Vector2, Texture } from 'three'
 
 export const NineSliceMaterial = shaderMaterial(
   {
@@ -11,7 +11,7 @@ export const NineSliceMaterial = shaderMaterial(
     uCornerRight: 0.2,
     uCornerTop: 0.2,
     uCornerBottom: 0.2,
-    uScale: new THREE.Vector2(1, 1)
+    uScale: new Vector2(1, 1)
   },
   // Vertex Shader
   `
@@ -120,13 +120,13 @@ extend({ NineSliceMaterial })
 declare module '@react-three/fiber' {
   interface ThreeElements {
     nineSliceMaterial: JSX.IntrinsicElements['shaderMaterial'] & {
-      uTexture?: THREE.Texture
+      uTexture?: Texture
       uNineSliceEnabled?: boolean
       uCornerLeft?: number
       uCornerRight?: number
       uCornerTop?: number
       uCornerBottom?: number
-      uScale?: THREE.Vector2
+      uScale?: Vector2
     }
   }
 }

@@ -1,6 +1,6 @@
 import { Canvas } from "@react-three/fiber";
 import { EffectComposer, Bloom, BrightnessContrast} from "@react-three/postprocessing";
-import * as THREE from "three";
+import { AdditiveBlending, ReinhardToneMapping, SRGBColorSpace } from "three";
 import { FloatingIsland } from "../components/island";
 import { SkyEnvironment } from "../components/sky/sky-environment";
 import { StarrySkybox } from "../components/sky/starry-skybox";
@@ -60,7 +60,7 @@ function SceneContent() {
           intensity={isDark ? 0.9 : 0.8}
           luminanceThreshold={isDark ? 0.9 : 1.1}
           luminanceSmoothing={0.1}
-          blendFunction={THREE.AdditiveBlending}
+          blendFunction={AdditiveBlending}
         />
       </EffectComposer>
 
@@ -113,8 +113,8 @@ export default function Scene() {
         style={{ background: "black" }}
         onCreated={handleCanvasCreated}
         gl={{
-          toneMapping: THREE.ReinhardToneMapping,
-          outputColorSpace: THREE.SRGBColorSpace,
+          toneMapping: ReinhardToneMapping,
+          outputColorSpace: SRGBColorSpace,
           antialias: true
         }}
       >

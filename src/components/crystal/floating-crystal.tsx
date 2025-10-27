@@ -1,12 +1,11 @@
 import { a, useSpring } from "@react-spring/three";
 import { Float, useGLTF, useTexture } from "@react-three/drei";
 import { useEffect, useRef, useState } from "react";
-import * as THREE from "three";
-import { Group } from "three";
+import { Group, MeshToonMaterial, Mesh, Vector3 } from "three";
 import { HitboxMesh } from "../hitbox-mesh";
 
 type Props = {
-  position: THREE.Vector3;
+  position: Vector3;
   rotation: [number, number, number];
   iconTextureUrl: string;
   modelUrl?: string;
@@ -31,7 +30,7 @@ export function FloatingCrystal({
   const [hitboxEnabled, setHitboxEnabled] = useState(false);
 
   const emissiveMaterialRef = useRef(
-    new THREE.MeshToonMaterial({
+    new MeshToonMaterial({
       color: "#00aaff",
       emissive: "#00ffff",
       emissiveIntensity: 1.2,
@@ -44,8 +43,8 @@ export function FloatingCrystal({
   // Apply material to all meshes once
   useEffect(() => {
     gltf.scene.traverse((child) => {
-      if ((child as THREE.Mesh).isMesh) {
-        const mesh = child as THREE.Mesh;
+      if ((child as Mesh).isMesh) {
+        const mesh = child as Mesh;
         mesh.material = emissiveMaterialRef.current;
         mesh.layers.enable(BLOOM_LAYER);
         mesh.castShadow = false;

@@ -1,7 +1,7 @@
 import { Billboard, Text, useTexture } from '@react-three/drei'
 import { useRef, useEffect, useState, useMemo, useCallback } from 'react'
 import { useFrame } from '@react-three/fiber'
-import * as THREE from 'three'
+import { Group, ShaderMaterial, Vector2, MathUtils } from 'three'
 import '../../materials/nine-slice-material'
 import { TypingAnimation, useTypingAnimation } from '../../hooks/useTypingAnimation'
 import { useHoverPointer } from '../../hooks/useHoverPointer'
@@ -45,15 +45,15 @@ export default function SpeechBubble({
   expandScaleSpeed = 8,
   onExpandComplete,
 }: Props) {
-  const groupRef = useRef<THREE.Group>(null)
-  const textRef = useRef<THREE.Group>(null)
-  const materialRef = useRef<THREE.ShaderMaterial>(null)
+  const groupRef = useRef<Group>(null)
+  const textRef = useRef<Group>(null)
+  const materialRef = useRef<ShaderMaterial>(null)
   const texture = useTexture('/textures/bubble-speech.png')
 
   const hoverScale = useRef(0)
   const expandScale = useRef(0)
-  const lastMaterialScale = useRef(new THREE.Vector2())
-  const lastTextScale = useRef(new THREE.Vector2())
+  const lastMaterialScale = useRef(new Vector2())
+  const lastTextScale = useRef(new Vector2())
   const [shouldExpand, setShouldExpand] = useState(false)
   const [cursorVisible, setCursorVisible] = useState(false)
   const [expandCompleteFired, setExpandCompleteFired] = useState(false)
@@ -124,8 +124,8 @@ export default function SpeechBubble({
     const prevH = hoverScale.current
     const prevE = expandScale.current
 
-    hoverScale.current = THREE.MathUtils.damp(prevH, hoverTarget, hoverScaleSpeed, delta)
-    expandScale.current = THREE.MathUtils.damp(prevE, expandTarget, expandScaleSpeed, delta)
+    hoverScale.current = MathUtils.damp(prevH, hoverTarget, hoverScaleSpeed, delta)
+    expandScale.current = MathUtils.damp(prevE, expandTarget, expandScaleSpeed, delta)
 
     // 🧠 Bail early if no changes
     if (
@@ -184,7 +184,7 @@ export default function SpeechBubble({
 
     const newScaleX = baseScale + expandScale.current * (expandedScaleX - baseScale)
     const newScaleY = baseScale + expandScale.current * (expandedScaleY - baseScale)
-    const newScale = new THREE.Vector2(newScaleX, newScaleY)
+    const newScale = new Vector2(newScaleX, newScaleY)
 
     if (!newScale.equals(lastMaterialScale.current)) {
       materialRef.current.uniforms.uScale.value.copy(newScale)

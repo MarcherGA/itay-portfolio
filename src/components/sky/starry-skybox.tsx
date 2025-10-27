@@ -1,6 +1,6 @@
 import { useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
-import * as THREE from "three";
+import { Points, BufferGeometry, Float32BufferAttribute, PointsMaterial } from "three";
 
 
 type StarrySkyboxProps = {
@@ -18,10 +18,10 @@ export function StarrySkybox({
   size = 0.3,
   rotationSpeed = 0.0001,
 }: StarrySkyboxProps) {
-  const pointsRef = useRef<THREE.Points>(null);
+  const pointsRef = useRef<Points>(null);
 
   const starsGeometry = useMemo(() => {
-    const geometry = new THREE.BufferGeometry();
+    const geometry = new BufferGeometry();
     const positions = [];
 
     for (let i = 0; i < count; i++) {
@@ -37,7 +37,7 @@ export function StarrySkybox({
 
     geometry.setAttribute(
       "position",
-      new THREE.Float32BufferAttribute(positions, 3)
+      new Float32BufferAttribute(positions, 3)
     );
 
     return geometry;
@@ -45,7 +45,7 @@ export function StarrySkybox({
 
   const material = useMemo(
     () =>
-      new THREE.PointsMaterial({
+      new PointsMaterial({
         color,
         size,
         sizeAttenuation: true,

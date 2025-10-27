@@ -1,17 +1,17 @@
 import { useThree } from "@react-three/fiber";
 import gsap from "gsap";
 import { useRef } from "react";
-import * as THREE from "three";
+import { Vector3 } from "three";
 
 export function useCameraTransition() {
   const threeState = useThree(); // Get the whole state instead of destructuring
   const isTransitioningRef = useRef(false);
 
   function createControlledTransition(
-    fromPosition: THREE.Vector3,
-    fromLookAt: THREE.Vector3,
-    toPosition: THREE.Vector3,
-    toLookAt: THREE.Vector3,
+    fromPosition: Vector3,
+    fromLookAt: Vector3,
+    toPosition: Vector3,
+    toLookAt: Vector3,
     duration = 1.5,
     ease = "power2.inOut"
   ) {
@@ -63,8 +63,8 @@ export function useCameraTransition() {
   }
 
   function transition (
-    toPosition: THREE.Vector3,
-    lookAtTarget: THREE.Vector3,
+    toPosition: Vector3,
+    lookAtTarget: Vector3,
     duration = 1.5,
     ease = 'power2.inOut',
     onComplete?: () => void
@@ -76,7 +76,7 @@ export function useCameraTransition() {
     
     isTransitioningRef.current = true;
     const fromPos = camera.position.clone();
-    const fromLook = new THREE.Vector3();
+    const fromLook = new Vector3();
     camera.getWorldDirection(fromLook);
     fromLook.add(camera.position);
 

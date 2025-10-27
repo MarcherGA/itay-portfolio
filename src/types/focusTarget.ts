@@ -1,11 +1,11 @@
-import * as THREE from "three";
+import { Object3D, Vector3 } from "three";
 
 
 export type FocusTargetData = {
     id: string;
-    mesh: THREE.Object3D | null; // allow null initially
-    cameraOffset: THREE.Vector3;
-    lookAtOffset: THREE.Vector3;
+    mesh: Object3D | null; // allow null initially
+    cameraOffset: Vector3;
+    lookAtOffset: Vector3;
   };
   
   export enum FocusTarget {

@@ -1,17 +1,17 @@
 import { useRef, useEffect, useCallback } from "react";
-import * as THREE from "three";
+import { Vector3, Object3D, Matrix4, Quaternion } from "three";
 import { useCameraTransition } from "./useCameraTransition";
 import { useFocusStore } from "./useFocusStore";
 import { FocusTarget } from "../types/focusTarget";
 
 export function useFocusScrollManager(
-  homePosition: { cameraPos: THREE.Vector3; lookAt: THREE.Vector3 },
+  homePosition: { cameraPos: Vector3; lookAt: Vector3 },
   threshold?: number
 ) {
   const { createControlledTransition, isTransitioningRef } = useCameraTransition();
 
   const { currentIndex } = useFocusStore(); // Remove targets from here
-  const cachedPositions = useRef<{ cameraPos: THREE.Vector3; lookAt: THREE.Vector3 }[]>([]);
+  const cachedPositions = useRef<{ cameraPos: Vector3; lookAt: Vector3 }[]>([]);
   const forwardTimelineRef = useRef<gsap.core.Timeline | null>(null);
   const backwardTimelineRef = useRef<gsap.core.Timeline | null>(null);
   
@@ -28,26 +28,26 @@ export function useFocusScrollManager(
   const velocityRef = useRef(0);
 
   // Helper function to calculate rotated camera positions
-  const calculateRotatedPositions = useCallback((mesh: THREE.Object3D, cameraOffset: THREE.Vector3, lookAtOffset: THREE.Vector3) => {
-    const worldPos = new THREE.Vector3();
+  const calculateRotatedPositions = useCallback((mesh: Object3D, cameraOffset: Vector3, lookAtOffset: Vector3) => {
+    const worldPos = new Vector3();
     mesh.getWorldPosition(worldPos);
-    
+
     // Get the world rotation matrix
-    const worldMatrix = new THREE.Matrix4();
+    const worldMatrix = new Matrix4();
     mesh.updateMatrixWorld(true);
     worldMatrix.copy(mesh.matrixWorld);
-    
+
     // Extract just the rotation part (remove translation and scale)
-    const rotationMatrix = new THREE.Matrix4();
-    const meshWorldQuaternion = new THREE.Quaternion();
-    const meshWorldScale = new THREE.Vector3();
-    worldMatrix.decompose(new THREE.Vector3(), meshWorldQuaternion, meshWorldScale);
+    const rotationMatrix = new Matrix4();
+    const meshWorldQuaternion = new Quaternion();
+    const meshWorldScale = new Vector3();
+    worldMatrix.decompose(new Vector3(), meshWorldQuaternion, meshWorldScale);
     rotationMatrix.makeRotationFromQuaternion(meshWorldQuaternion);
-    
+
     // Transform the offsets by the rotation matrix
     const rotatedCameraOffset = cameraOffset.clone().applyMatrix4(rotationMatrix);
     const rotatedLookAtOffset = lookAtOffset.clone().applyMatrix4(rotationMatrix);
-    
+
     return {
       cameraPos: worldPos.clone().add(rotatedCameraOffset),
       lookAt: worldPos.clone().add(rotatedLookAtOffset),
